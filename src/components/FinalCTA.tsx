@@ -11,12 +11,15 @@ interface TickerResult {
 const MAX_TICKERS = 3;
 
 export default function FinalCTA() {
+  const [email, setEmail] = useState("");
   const [tickerQuery, setTickerQuery] = useState("");
   const [tickerResults, setTickerResults] = useState<TickerResult[]>([]);
   const [selectedTickers, setSelectedTickers] = useState<TickerResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -73,11 +76,9 @@ export default function FinalCTA() {
   }, []);
 
   const handleTickerSelect = (ticker: TickerResult) => {
-    // Check if already selected
     if (selectedTickers.some((t) => t.symbol === ticker.symbol)) {
       return;
     }
-    // Check max limit
     if (selectedTickers.length >= MAX_TICKERS) {
       return;
     }
@@ -92,6 +93,51 @@ export default function FinalCTA() {
 
   const handleTickerInputChange = (value: string) => {
     setTickerQuery(value.toUpperCase());
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitStatus(null);
+
+    if (!email || !email.includes("@")) {
+      setSubmitStatus({ type: "error", message: "유효한 이메일 주소를 입력해주세요." });
+      return;
+    }
+
+    if (selectedTickers.length === 0) {
+      setSubmitStatus({ type: "error", message: "최소 1개의 종목을 선택해주세요." });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          tickers: selectedTickers.map((t) => t.symbol),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "신청 중 오류가 발생했습니다.");
+      }
+
+      setSubmitStatus({ type: "success", message: "신청이 완료되었습니다! 곧 리포트를 받아보실 수 있습니다." });
+      setEmail("");
+      setSelectedTickers([]);
+    } catch (error) {
+      setSubmitStatus({
+        type: "error",
+        message: error instanceof Error ? error.message : "신청 중 오류가 발생했습니다.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filteredResults = tickerResults.filter(
@@ -111,10 +157,12 @@ export default function FinalCTA() {
           이메일과 관심 종목만 입력하면 끝!
         </p>
 
-        <form className="flex gap-3 justify-center flex-wrap max-md:flex-col">
+        <form onSubmit={handleSubmit} className="flex gap-3 justify-center flex-wrap max-md:flex-col">
           <input
             type="email"
             name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="이메일 주소"
             required
             className="flex-1 min-w-[200px] max-w-[280px] px-5 py-4 bg-bg-card border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-green transition-colors max-md:max-w-full"
@@ -144,10 +192,10 @@ export default function FinalCTA() {
 
           <button
             type="submit"
-            disabled={selectedTickers.length === 0}
+            disabled={selectedTickers.length === 0 || isSubmitting}
             className="px-8 py-4 bg-gradient-to-r from-accent-green to-accent-cyan text-black font-semibold rounded-lg text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent-green/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
-            리포트 신청
+            {isSubmitting ? "신청 중..." : "리포트 신청"}
           </button>
         </form>
 
@@ -212,6 +260,19 @@ export default function FinalCTA() {
           <p className="mt-3 text-xs text-text-muted">
             {selectedTickers.length} / {MAX_TICKERS} 종목 선택됨
           </p>
+        )}
+
+        {/* Submit Status Message */}
+        {submitStatus && (
+          <div
+            className={`mt-6 p-4 rounded-lg text-sm ${
+              submitStatus.type === "success"
+                ? "bg-accent-green/20 text-accent-green"
+                : "bg-red-500/20 text-red-400"
+            }`}
+          >
+            {submitStatus.message}
+          </div>
         )}
       </div>
     </section>
