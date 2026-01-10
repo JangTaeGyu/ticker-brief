@@ -361,7 +361,7 @@ function SwotItem({
     strength: "bg-accent-green/10 text-accent-green",
     weakness: "bg-accent-red/10 text-accent-red",
     opportunity: "bg-accent-blue/10 text-accent-blue",
-    threat: "bg-accent-orange/10 text-accent-orange",
+    threat: "bg-yellow-500/10 text-yellow-500",
   }[variant];
 
   return (
@@ -385,19 +385,19 @@ function ScenarioItem({
 }) {
   const bgStyles = {
     bull: "bg-accent-green/10",
-    base: "bg-text-muted/10",
+    base: "bg-accent-blue/10",
     bear: "bg-accent-red/10",
   }[variant];
 
   const labelColor = {
     bull: "text-accent-green",
-    base: "text-text-muted",
+    base: "text-accent-blue",
     bear: "text-accent-red",
   }[variant];
 
   const changeColor = {
     bull: "text-accent-green",
-    base: "text-text-muted",
+    base: "text-accent-blue",
     bear: "text-accent-red",
   }[variant];
 
