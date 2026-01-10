@@ -11,6 +11,7 @@ Thumbs.db
 .idea/
 .vscode/
 .claude/
+.playwright-mcp/
 .next
 *.swp
 *.swo
