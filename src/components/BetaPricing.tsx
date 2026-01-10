@@ -84,10 +84,10 @@ export default function BetaPricing() {
         </div>
 
         {/* How It Works */}
-        <div className="text-center mb-10">
-          <h3 className="text-xl font-bold">리포트 받는 방법</h3>
+        <div className="text-center mb-12">
+          <h3 className="text-2xl font-bold">리포트 받는 방법</h3>
         </div>
-        <div className="flex justify-center items-center gap-6 mb-16 flex-wrap max-md:flex-col">
+        <div className="flex justify-center items-center gap-6 pb-8 flex-wrap max-md:flex-col">
           <BetaStep num={1} title="이메일 & 종목 등록">
             이메일 주소와 분석 원하는 미국 주식 티커를 입력하세요
           </BetaStep>
