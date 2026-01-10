@@ -9,6 +9,7 @@ interface TickerResult {
 }
 
 const MAX_TICKERS = 3;
+const WEEKLY_LIMIT = 10;
 
 export default function FinalCTA() {
   const [email, setEmail] = useState("");
@@ -20,6 +21,7 @@ export default function FinalCTA() {
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [remainingReports, setRemainingReports] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -75,6 +77,27 @@ export default function FinalCTA() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Check remaining reports when email changes
+  useEffect(() => {
+    if (!email || !email.includes("@")) {
+      setRemainingReports(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/check-limit?email=${encodeURIComponent(email)}`);
+        const data = await response.json();
+        setRemainingReports(data.remaining);
+      } catch (error) {
+        console.error("Check limit error:", error);
+        setRemainingReports(null);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [email]);
+
   const handleTickerSelect = (ticker: TickerResult) => {
     if (selectedTickers.some((t) => t.symbol === ticker.symbol)) {
       return;
@@ -128,6 +151,10 @@ export default function FinalCTA() {
       }
 
       setSubmitStatus({ type: "success", message: "신청이 완료되었습니다! 곧 리포트를 받아보실 수 있습니다." });
+      // Update remaining count
+      if (remainingReports !== null) {
+        setRemainingReports(Math.max(0, remainingReports - selectedTickers.length));
+      }
       setEmail("");
       setSelectedTickers([]);
     } catch (error) {
@@ -153,9 +180,13 @@ export default function FinalCTA() {
         <h2 className="font-['Playfair_Display'] text-[clamp(28px,4vw,40px)] font-bold mb-4">
           지금 무료로 리포트 받아보세요
         </h2>
-        <p className="text-text-secondary text-lg mb-10">
+        <p className="text-text-secondary text-lg mb-2">
           이메일과 관심 종목만 입력하면 끝!
         </p>
+        <div className="inline-flex items-center gap-2 bg-accent-cyan/10 border border-accent-cyan/30 text-accent-cyan text-sm px-4 py-2 my-2 rounded-full mb-10">
+          <span>📋</span>
+          <span>1주일에 최대 <strong>10개</strong> 종목까지 리포트 신청 가능</span>
+        </div>
 
         <form onSubmit={handleSubmit} className="flex gap-3 justify-center flex-wrap max-md:flex-col">
           <input
@@ -198,6 +229,13 @@ export default function FinalCTA() {
             {isSubmitting ? "신청 중..." : "리포트 신청"}
           </button>
         </form>
+
+        {/* Remaining Reports Info */}
+        {remainingReports !== null && (
+          <p className={`mt-4 text-sm ${remainingReports === 0 ? "text-red-400" : "text-text-muted"}`}>
+            이번 주 남은 리포트: <span className="font-semibold text-accent-green">{remainingReports}</span> / {WEEKLY_LIMIT}
+          </p>
+        )}
 
         {/* Dropdown Portal */}
         {showDropdown && filteredResults.length > 0 && typeof document !== "undefined" &&
