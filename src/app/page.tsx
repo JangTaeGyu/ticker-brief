@@ -1,6 +1,7 @@
 import Hero from "@/components/Hero";
 import SampleComparison from "@/components/SampleComparison";
 import Comparison from "@/components/Comparison";
+import BetaPricing from "@/components/BetaPricing";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <Hero />
       <SampleComparison />
       <Comparison />
+      <BetaPricing />
     </main>
   );
 }
