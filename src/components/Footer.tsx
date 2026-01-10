@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="relative z-[1] border-t border-border py-12 px-10 max-md:py-8 max-md:px-5">
+    <footer className="relative z-0 border-t border-border py-12 px-10 max-md:py-8 max-md:px-5">
       <div className="max-w-[1200px] mx-auto flex flex-col items-center gap-6">
         {/* Logo */}
         <a href="#" className="flex items-center gap-2">

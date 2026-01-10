@@ -1,23 +1,40 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
 interface TickerResult {
   symbol: string;
   name: string;
 }
 
+const MAX_TICKERS = 3;
+
 export default function FinalCTA() {
   const [tickerQuery, setTickerQuery] = useState("");
   const [tickerResults, setTickerResults] = useState<TickerResult[]>([]);
-  const [selectedTicker, setSelectedTicker] = useState<TickerResult | null>(null);
+  const [selectedTickers, setSelectedTickers] = useState<TickerResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Update dropdown position when showing
+  useEffect(() => {
+    if (showDropdown && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+        width: Math.max(rect.width, 340),
+      });
+    }
+  }, [showDropdown, tickerResults]);
 
   // Debounced search
   useEffect(() => {
-    if (!tickerQuery || tickerQuery.length < 1 || selectedTicker) {
+    if (!tickerQuery || tickerQuery.length < 1) {
       setTickerResults([]);
       return;
     }
@@ -37,12 +54,17 @@ export default function FinalCTA() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [tickerQuery, selectedTicker]);
+  }, [tickerQuery]);
 
   // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     }
@@ -51,20 +73,35 @@ export default function FinalCTA() {
   }, []);
 
   const handleTickerSelect = (ticker: TickerResult) => {
-    setSelectedTicker(ticker);
-    setTickerQuery(ticker.symbol);
+    // Check if already selected
+    if (selectedTickers.some((t) => t.symbol === ticker.symbol)) {
+      return;
+    }
+    // Check max limit
+    if (selectedTickers.length >= MAX_TICKERS) {
+      return;
+    }
+    setSelectedTickers([...selectedTickers, ticker]);
+    setTickerQuery("");
     setShowDropdown(false);
+  };
+
+  const handleRemoveTicker = (symbol: string) => {
+    setSelectedTickers(selectedTickers.filter((t) => t.symbol !== symbol));
   };
 
   const handleTickerInputChange = (value: string) => {
     setTickerQuery(value.toUpperCase());
-    setSelectedTicker(null);
   };
+
+  const filteredResults = tickerResults.filter(
+    (ticker) => !selectedTickers.some((t) => t.symbol === ticker.symbol)
+  );
 
   return (
     <section
       id="subscribe"
-      className="relative z-[1] py-24 px-10 text-center max-md:py-16 max-md:px-5"
+      className="relative py-24 px-10 text-center max-md:py-16 max-md:px-5"
     >
       <div className="max-w-[600px] mx-auto">
         <h2 className="font-['Playfair_Display'] text-[clamp(28px,4vw,40px)] font-bold mb-4">
@@ -84,17 +121,17 @@ export default function FinalCTA() {
           />
 
           {/* Ticker Search */}
-          <div className="relative" ref={dropdownRef}>
+          <div className="relative">
             <input
+              ref={inputRef}
               type="text"
               name="ticker"
               value={tickerQuery}
               onChange={(e) => handleTickerInputChange(e.target.value)}
               onFocus={() => tickerResults.length > 0 && setShowDropdown(true)}
-              placeholder="티커 검색"
-              required
+              placeholder="티커 검색 (최대 3개)"
               autoComplete="off"
-              className="w-[180px] px-5 py-4 bg-bg-card border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-green transition-colors max-md:w-full"
+              className="w-[200px] px-5 py-4 bg-bg-card border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-green transition-colors max-md:w-full"
             />
 
             {/* Loading indicator */}
@@ -103,43 +140,79 @@ export default function FinalCTA() {
                 <div className="w-4 h-4 border-2 border-accent-green border-t-transparent rounded-full animate-spin" />
               </div>
             )}
-
-            {/* Selected ticker badge */}
-            {selectedTicker && (
-              <div className="absolute left-2 top-1/2 -translate-y-1/2 bg-accent-green/20 text-accent-green text-xs px-2 py-0.5 rounded">
-                {selectedTicker.symbol}
-              </div>
-            )}
-
-            {/* Dropdown */}
-            {showDropdown && tickerResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-bg-card border border-border rounded-lg shadow-xl max-h-[240px] overflow-y-auto z-50">
-                {tickerResults.map((ticker) => (
-                  <button
-                    key={ticker.symbol}
-                    type="button"
-                    onClick={() => handleTickerSelect(ticker)}
-                    className="w-full px-4 py-3 text-left hover:bg-white/5 transition-colors border-b border-border last:border-b-0"
-                  >
-                    <span className="font-['JetBrains_Mono'] font-semibold text-accent-green">
-                      {ticker.symbol}
-                    </span>
-                    <span className="text-sm text-text-muted ml-2 truncate">
-                      {ticker.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           <button
             type="submit"
-            className="px-8 py-4 bg-gradient-to-r from-accent-green to-accent-cyan text-black font-semibold rounded-lg text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent-green/25"
+            disabled={selectedTickers.length === 0}
+            className="px-8 py-4 bg-gradient-to-r from-accent-green to-accent-cyan text-black font-semibold rounded-lg text-sm transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent-green/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
             리포트 신청
           </button>
         </form>
+
+        {/* Dropdown Portal */}
+        {showDropdown && filteredResults.length > 0 && typeof document !== "undefined" &&
+          createPortal(
+            <div
+              ref={dropdownRef}
+              style={{
+                position: "absolute",
+                top: dropdownPosition.top,
+                left: dropdownPosition.left,
+                width: dropdownPosition.width,
+                zIndex: 99999,
+              }}
+              className="bg-[#0d1117] border border-border rounded-lg shadow-2xl max-h-50 overflow-y-auto"
+            >
+              {filteredResults.map((ticker) => (
+                <button
+                  key={ticker.symbol}
+                  type="button"
+                  onClick={() => handleTickerSelect(ticker)}
+                  className="w-full px-4 py-3 text-left bg-bg-card hover:bg-[#161b22] transition-colors border-b border-border last:border-b-0"
+                >
+                  <span className="font-['JetBrains_Mono'] font-semibold text-accent-green">
+                    {ticker.symbol}
+                  </span>
+                  <span className="text-sm text-text-muted ml-2 truncate">
+                    {ticker.name}
+                  </span>
+                </button>
+              ))}
+            </div>,
+            document.body
+          )
+        }
+
+        {/* Selected tickers badges */}
+        {selectedTickers.length > 0 && (
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            {selectedTickers.map((ticker) => (
+              <div
+                key={ticker.symbol}
+                className="flex items-center gap-2 bg-accent-green/20 text-accent-green text-xs px-3 py-1.5 rounded-lg"
+              >
+                <span className="font-['JetBrains_Mono'] font-semibold">{ticker.symbol}</span>
+                <span className="text-text-muted hidden sm:inline">{ticker.name}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTicker(ticker.symbol)}
+                  className="ml-1 text-text-muted hover:text-text-primary"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Counter */}
+        {selectedTickers.length > 0 && (
+          <p className="mt-3 text-xs text-text-muted">
+            {selectedTickers.length} / {MAX_TICKERS} 종목 선택됨
+          </p>
+        )}
       </div>
     </section>
   );
