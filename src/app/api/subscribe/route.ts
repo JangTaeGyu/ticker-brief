@@ -22,11 +22,11 @@ async function sendSlackNotification(email: string, tickers: string[]) {
           fields: [
             {
               type: "mrkdwn",
-              text: `*이메일:*\n${email}`,
+              text: `*이메일:* ${email}`,
             },
             {
               type: "mrkdwn",
-              text: `*종목:*\n${tickers.join(", ")}`,
+              text: `*종목:* ${tickers.join(", ")}`,
             },
           ],
         },
