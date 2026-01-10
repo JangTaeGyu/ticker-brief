@@ -2,6 +2,56 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { headers } from "next/headers";
 
+async function sendSlackNotification(email: string, tickers: string[]) {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  try {
+    const message = {
+      blocks: [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: "📊 새로운 리포트 신청",
+            emoji: true,
+          },
+        },
+        {
+          type: "section",
+          fields: [
+            {
+              type: "mrkdwn",
+              text: `*이메일:*\n${email}`,
+            },
+            {
+              type: "mrkdwn",
+              text: `*종목:*\n${tickers.join(", ")}`,
+            },
+          ],
+        },
+        {
+          type: "context",
+          elements: [
+            {
+              type: "mrkdwn",
+              text: `신청 시간: ${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}`,
+            },
+          ],
+        },
+      ],
+    };
+
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(message),
+    });
+  } catch (error) {
+    console.error("Slack notification error:", error);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { email, tickers } = await request.json();
@@ -123,6 +173,9 @@ export async function POST(request: Request) {
       console.error("Log insert error:", logError);
       // Don't fail the request if logging fails
     }
+
+    // 4. Send Slack notification
+    await sendSlackNotification(email, tickers);
 
     return NextResponse.json({ success: true });
   } catch (error) {
