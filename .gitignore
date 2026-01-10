@@ -37,3 +37,6 @@ venv/
 dist/
 build/
 *.egg-info/
+
+# Project
+tasks/
