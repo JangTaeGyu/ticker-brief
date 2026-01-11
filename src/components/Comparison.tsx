@@ -160,7 +160,7 @@ export default function Comparison() {
             </h4>
             <p className="text-sm text-text-secondary leading-relaxed">
               TickerBrief는 무료 데이터 소스(yfinance, Finnhub)를 활용합니다.
-              Morningstar의 20년 트랙레코드나 Seeking Alpha의 18,000+ 전문
+              M**********의 20년 트랙레코드나 S****** *****의 18,000+ 전문
               애널리스트 커뮤니티를 대체하지는 않습니다.<br />
               <strong className="text-text-primary">
                 아이디어 발굴 → 1차 스크리닝 → 심층 리서치 트리거
