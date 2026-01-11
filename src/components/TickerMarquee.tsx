@@ -85,7 +85,7 @@ export default function TickerMarquee() {
   );
 
   return (
-    <div className="fixed top-[72px] left-0 right-0 z-[999] bg-bg-secondary border-b border-border overflow-hidden py-2 max-md:top-[60px]">
+    <div className="fixed top-[72px] left-0 right-0 z-[999] bg-bg-secondary border-b border-border overflow-hidden py-2 max-md:top-[60px] max-md:pt-4">
       <div className="flex animate-marquee">
         <div className="flex shrink-0">
           {tickers.map((item, index) => (
