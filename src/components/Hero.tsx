@@ -28,7 +28,7 @@ export default function Hero() {
         <div className="flex justify-center gap-7 text-text-muted text-[13px] max-md:flex-col max-md:gap-3">
           <span className="flex items-center gap-1.5">✓ 100% 무료</span>
           <span className="flex items-center gap-1.5">✓ 미국 주식 지원</span>
-          <span className="flex items-center gap-1.5">✓ 12시간 내 발송</span>
+          <span className="flex items-center gap-1.5">✓ 10분 내 발송</span>
         </div>
       </div>
     </section>
