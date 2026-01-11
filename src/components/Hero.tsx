@@ -84,12 +84,19 @@ export default function Hero() {
           <span className="flex items-center gap-1.5">✓ 100% 무료</span>
           <span className="flex items-center gap-1.5">✓ 미국 주식 지원</span>
           <span className="flex items-center gap-1.5">✓ 10분 내 발송</span>
-          {reportCount !== null && reportCount > 0 && (
-            <span className="flex items-center gap-1.5">
-              ✓ <span className="text-accent-green text-[16px] font-semibold">{animatedCount.toLocaleString()}+</span> 리포트 발송 완료
-            </span>
-          )}
         </div>
+
+        {/* Report Count Badge */}
+        {reportCount !== null && reportCount > 0 && (
+          <div className="mt-6 inline-flex items-baseline gap-2 text-sm text-text-secondary">
+            <span className="bg-accent-green text-black px-2 py-1 rounded text-xs font-bold translate-y-[-1px]">
+              현재
+            </span>
+            <span>
+              <span className="text-accent-green font-bold text-lg">{animatedCount.toLocaleString()}+</span> 리포트 발송 완료
+            </span>
+          </div>
+        )}
       </div>
     </section>
   );
