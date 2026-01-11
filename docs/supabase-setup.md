@@ -31,6 +31,14 @@ CREATE TABLE request_logs (
   user_agent TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+ALTER TABLE reports ADD COLUMN score DECIMAL(5,2);
+ALTER TABLE reports ADD COLUMN grade TEXT;
+ALTER TABLE reports ADD COLUMN upside DECIMAL(6,2);
+ALTER TABLE reports ADD COLUMN report_path TEXT;
+ALTER TABLE reports ADD COLUMN error_message TEXT;
+ALTER TABLE reports ADD COLUMN started_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE reports ADD COLUMN completed_at TIMESTAMP WITH TIME ZONE;
 ```
 
 ## RLS (Row Level Security) 설정
@@ -47,6 +55,7 @@ CREATE POLICY "Allow anonymous select" ON request_users FOR SELECT USING (true);
 
 CREATE POLICY "Allow anonymous insert" ON reports FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow anonymous select" ON reports FOR SELECT USING (true);
+CREATE POLICY "Allow anonymous update" ON reports FOR UPDATE USING (true) WITH CHECK (true);
 
 CREATE POLICY "Allow anonymous insert" ON request_logs FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow anonymous select" ON request_logs FOR SELECT USING (true);

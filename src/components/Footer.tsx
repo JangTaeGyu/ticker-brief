@@ -26,7 +26,7 @@ export default function Footer() {
             면책조항
           </Link>
           <a
-            href="mailto:support@tickerbrief.com"
+            href="mailto:ttggbbgg2@gmail.com"
             className="hover:text-text-primary transition-colors"
           >
             문의하기

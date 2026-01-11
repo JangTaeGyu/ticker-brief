@@ -155,7 +155,7 @@ export default function PrivacyPage() {
                 <strong>개인정보 보호책임자</strong>
               </p>
               <p className="text-text-muted mt-2">
-                이메일: support@tickerbrief.com
+                이메일: ttggbbgg2@gmail.com
               </p>
             </div>
           </section>
