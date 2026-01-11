@@ -1,4 +1,59 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+
+function useCountUp(end: number, duration: number = 2000) {
+  const [count, setCount] = useState(0);
+  const countRef = useRef(0);
+  const startTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (end <= 0) return;
+
+    const animate = (timestamp: number) => {
+      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      const progress = timestamp - startTimeRef.current;
+      const percentage = Math.min(progress / duration, 1);
+
+      // easeOutQuad for smooth deceleration
+      const eased = 1 - (1 - percentage) * (1 - percentage);
+      const currentCount = Math.floor(eased * end);
+
+      if (currentCount !== countRef.current) {
+        countRef.current = currentCount;
+        setCount(currentCount);
+      }
+
+      if (percentage < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCount(end);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [end, duration]);
+
+  return count;
+}
+
 export default function Hero() {
+  const [reportCount, setReportCount] = useState<number | null>(null);
+  const animatedCount = useCountUp(reportCount || 0, 1500);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const response = await fetch("/api/stats");
+        const data = await response.json();
+        setReportCount(data.count);
+      } catch (error) {
+        console.error("Stats fetch error:", error);
+      }
+    }
+    fetchStats();
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center px-10 pt-32 pb-20 z-[1] max-md:px-5 max-md:pt-24 max-md:pb-16">
       <div className="max-w-[900px] text-center">
@@ -29,6 +84,11 @@ export default function Hero() {
           <span className="flex items-center gap-1.5">✓ 100% 무료</span>
           <span className="flex items-center gap-1.5">✓ 미국 주식 지원</span>
           <span className="flex items-center gap-1.5">✓ 10분 내 발송</span>
+          {reportCount !== null && reportCount > 0 && (
+            <span className="flex items-center gap-1.5">
+              ✓ <span className="text-accent-green font-semibold">{animatedCount.toLocaleString()}+</span> 리포트 발송
+            </span>
+          )}
         </div>
       </div>
     </section>
