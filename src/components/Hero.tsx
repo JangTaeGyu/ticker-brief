@@ -25,7 +25,7 @@ export default function Hero() {
         </p>
 
         {/* Trust indicators */}
-        <div className="flex justify-center gap-7 text-text-muted text-[13px] max-md:flex-col max-md:gap-3">
+        <div className="flex justify-center gap-7 text-text-muted text-[13px] max-md:flex-col max-md:gap-3 max-md:items-center">
           <span className="flex items-center gap-1.5">✓ 100% 무료</span>
           <span className="flex items-center gap-1.5">✓ 미국 주식 지원</span>
           <span className="flex items-center gap-1.5">✓ 10분 내 발송</span>
