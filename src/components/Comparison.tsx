@@ -33,13 +33,13 @@ export default function Comparison() {
                   </span>
                 </th>
                 <th className="bg-bg-card p-4 text-center font-semibold text-[13px] border-b border-border">
-                  Seeking Alpha
+                  S****** *****
                   <span className="block text-[11px] font-normal text-text-muted mt-1">
                     $24.9/월
                   </span>
                 </th>
                 <th className="bg-bg-card p-4 text-center font-semibold text-[13px] border-b border-border">
-                  Morningstar
+                  M**********
                   <span className="block text-[11px] font-normal text-text-muted mt-1">
                     $22.95/월
                   </span>
