@@ -88,7 +88,7 @@ export default function Hero() {
 
         {/* Report Count Badge */}
         {reportCount !== null && reportCount > 0 && (
-          <div className="mt-6 inline-flex items-baseline gap-2 text-sm text-text-secondary">
+          <div className="mt-8 inline-flex items-baseline gap-2 text-sm text-text-secondary">
             <span className="bg-accent-green text-black px-2 py-1 rounded text-xs font-bold translate-y-[-1px]">
               현재
             </span>
