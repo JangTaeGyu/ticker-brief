@@ -93,7 +93,7 @@ export default function BetaPricing() {
           </BetaStep>
           <div className="text-2xl text-text-muted max-md:rotate-90">→</div>
           <BetaStep num={2} title="리포트 생성">
-            관리자가 확인 후 AI 분석 리포트를 생성합니다
+            5분마다 자동으로 AI 분석 리포트를 생성합니다
           </BetaStep>
           <div className="text-2xl text-text-muted max-md:rotate-90">→</div>
           <BetaStep num={3} title="이메일 수신">
