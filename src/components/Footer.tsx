@@ -14,7 +14,7 @@ export default function Footer() {
             height={32}
             className="rounded-lg flex-shrink-0"
           />
-          <span className="text-lg font-bold leading-none">
+          <span className="text-lg font-bold leading-none translate-y-[-1px]">
             Ticker<span className="text-accent-green">Brief</span>
           </span>
         </Link>
