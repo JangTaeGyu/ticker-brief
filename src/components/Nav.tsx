@@ -1,14 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Nav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-[1000] px-10 py-4 flex justify-between items-center bg-bg-primary/85 backdrop-blur-[20px] border-b border-border max-md:px-5 max-md:py-3.5">
       <Link href="/" className="flex items-center gap-2.5 no-underline">
-        <div className="w-10 h-10 bg-gradient-to-br from-accent-green to-emerald-600 rounded-[10px] flex items-center justify-center text-xl">
-          📊
-        </div>
+        <Image
+          src="/favicon-512.png"
+          alt="TickerBrief"
+          width={40}
+          height={40}
+          className="rounded-[10px]"
+        />
         <div className="text-[22px] font-bold text-text-primary tracking-tight">
           Ticker<span className="text-accent-green">Brief</span>
         </div>
