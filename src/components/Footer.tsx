@@ -12,11 +12,11 @@ export default function Footer() {
             alt="TickerBrief"
             width={32}
             height={32}
-            className="rounded-lg"
+            className="rounded-lg flex-shrink-0"
           />
-          <div className="text-lg font-bold">
+          <span className="text-lg font-bold leading-none">
             Ticker<span className="text-accent-green">Brief</span>
-          </div>
+          </span>
         </Link>
 
         {/* Links */}
