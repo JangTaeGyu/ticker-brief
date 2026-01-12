@@ -3,7 +3,7 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import TickerMarquee from "@/components/TickerMarquee";
 
-const siteUrl = "https://ticker-brief.vercel.app";
+const siteUrl = "https://ticker-brief.jubrolab.dev";
 
 export const metadata: Metadata = {
   title: "TickerBrief - AI 주식 분석 리포트 | 무료 미국 주식 분석",

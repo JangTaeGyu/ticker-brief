@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://ticker-brief.vercel.app";
+  const baseUrl = "https://ticker-brief.jubrolab.dev";
 
   return [
     {
