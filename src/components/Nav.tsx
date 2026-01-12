@@ -6,7 +6,7 @@ import Image from "next/image";
 export default function Nav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-[1000] px-10 py-4 flex justify-between items-center bg-bg-primary/85 backdrop-blur-[20px] border-b border-border max-md:px-5 max-md:py-3.5">
-      <Link href="/" className="flex items-center gap-2.5 no-underline">
+      <Link href="/" className="flex items-center gap-1.5 no-underline">
         <Image
           src="/favicon-512.png"
           alt="TickerBrief"
