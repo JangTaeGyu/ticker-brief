@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import TickerMarquee from "@/components/TickerMarquee";
@@ -118,6 +119,7 @@ export default function RootLayout({
         <Nav />
         <TickerMarquee />
         {children}
+        <Analytics />
       </body>
     </html>
   );
