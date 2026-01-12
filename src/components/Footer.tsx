@@ -1,14 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
     <footer className="relative z-0 border-t border-border py-12 px-10 max-md:py-8 max-md:px-5">
       <div className="max-w-[1200px] mx-auto flex flex-col items-center gap-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-accent-green to-accent-cyan rounded-lg flex items-center justify-center text-sm">
-            📊
-          </div>
+        <Link href="/" className="flex items-center gap-1.5">
+          <Image
+            src="/favicon-512.png"
+            alt="TickerBrief"
+            width={32}
+            height={32}
+            className="rounded-lg"
+          />
           <div className="text-lg font-bold">
             Ticker<span className="text-accent-green">Brief</span>
           </div>
