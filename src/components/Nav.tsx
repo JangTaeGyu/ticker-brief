@@ -44,6 +44,12 @@ export default function Nav() {
           FAQ
         </Link>
         <Link
+          href="/my-reports"
+          className="border border-accent-green text-accent-green px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-accent-green hover:text-black transition-colors"
+        >
+          내 리포트
+        </Link>
+        <Link
           href="#subscribe"
           className="bg-accent-green text-black px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-emerald-600 transition-colors"
         >
