@@ -9,28 +9,11 @@ interface ReportCardProps {
   isMine: boolean;
 }
 
-// 상태별 스타일
-const statusStyles: Record<string, { label: string; color: string; bg: string }> = {
-  pending: {
-    label: "대기",
-    color: "text-gray-400",
-    bg: "bg-gray-400/10",
-  },
-  processing: {
-    label: "처리중",
-    color: "text-blue-400",
-    bg: "bg-blue-400/10",
-  },
-  completed: {
-    label: "완료",
-    color: "text-emerald-400",
-    bg: "bg-emerald-400/10",
-  },
-  failed: {
-    label: "실패",
-    color: "text-red-400",
-    bg: "bg-red-400/10",
-  },
+// 상태별 서술형 메시지
+const statusMessages: Record<string, { message: string; borderColor: string; textColor: string }> = {
+  pending: { message: "리포트 생성 대기중입니다", borderColor: "border-gray-500", textColor: "text-gray-500" },
+  processing: { message: "리포트를 생성하고 있습니다", borderColor: "border-blue-500", textColor: "text-blue-500" },
+  failed: { message: "리포트 생성에 실패했습니다", borderColor: "border-red-500", textColor: "text-red-500" },
 };
 
 // 등급별 색상 (TickerMarquee와 동일)
@@ -90,11 +73,16 @@ export default function ReportCard({
   score,
   isMine,
 }: ReportCardProps) {
-  const statusStyle = statusStyles[status] || statusStyles.pending;
   const gradeStyle = getGradeColor(grade ?? null);
+  const isNotCompleted = status !== "completed";
+  const statusInfo = statusMessages[status];
 
   return (
-    <div className="relative p-6 rounded-2xl border border-border bg-bg-card hover:border-accent-green/50 transition-colors">
+    <div className={`relative p-6 rounded-2xl border bg-bg-card transition-colors ${
+      isNotCompleted
+        ? `opacity-50 ${statusInfo?.borderColor || "border-border"}`
+        : "border-border hover:border-accent-green/50"
+    }`}>
       {/* 관심 티커 아이콘 */}
       {isMine && (
         <div
@@ -114,15 +102,6 @@ export default function ReportCard({
 
       {/* 티커 */}
       <div className="text-2xl font-bold mb-4">{ticker}</div>
-
-      {/* 상태 */}
-      <div className="flex items-center gap-2 mb-4">
-        <span
-          className={`px-2.5 py-1 text-xs font-medium rounded-full ${statusStyle.color} ${statusStyle.bg}`}
-        >
-          {statusStyle.label}
-        </span>
-      </div>
 
       {/* 완료된 경우 상세 정보 표시 */}
       {status === "completed" && (
@@ -166,17 +145,10 @@ export default function ReportCard({
         </div>
       )}
 
-      {/* 처리중/대기 상태 안내 */}
-      {(status === "pending" || status === "processing") && (
-        <div className="pt-4 border-t border-border text-center text-sm text-text-muted">
-          리포트 생성 대기 중...
-        </div>
-      )}
-
-      {/* 실패 상태 안내 */}
-      {status === "failed" && (
-        <div className="pt-4 border-t border-border text-center text-sm text-red-400">
-          리포트 생성에 실패했습니다
+      {/* 대기/처리중/실패 상태 서술형 메시지 */}
+      {isNotCompleted && (
+        <div className={`pt-4 border-t text-center text-sm ${statusInfo?.borderColor || "border-border"} ${statusInfo?.textColor || "text-text-muted"}`}>
+          {statusInfo?.message || "상태를 확인할 수 없습니다"}
         </div>
       )}
     </div>
