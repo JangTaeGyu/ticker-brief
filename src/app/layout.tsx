@@ -5,6 +5,8 @@ import "./globals.css";
 import Nav from "@/components/Nav";
 import TickerMarquee from "@/components/TickerMarquee";
 import PWARegister from "@/components/PWARegister";
+import { CartProvider } from "@/contexts/CartContext";
+import CartButton from "@/components/CartButton";
 
 const siteUrl = "https://ticker-brief.jubrolab.dev";
 
@@ -115,13 +117,16 @@ export default function RootLayout({
         />
       </head>
       <body className="overflow-x-hidden leading-relaxed">
-        <PWARegister />
-        <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(16,185,129,0.15),transparent),radial-gradient(ellipse_60%_40%_at_100%_50%,rgba(59,130,246,0.1),transparent),radial-gradient(ellipse_60%_40%_at_0%_80%,rgba(139,92,246,0.08),transparent)]" />
-        <Nav />
-        <TickerMarquee />
-        {children}
-        <Analytics />
-        <SpeedInsights />
+        <CartProvider>
+          <PWARegister />
+          <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(16,185,129,0.15),transparent),radial-gradient(ellipse_60%_40%_at_100%_50%,rgba(59,130,246,0.1),transparent),radial-gradient(ellipse_60%_40%_at_0%_80%,rgba(139,92,246,0.08),transparent)]" />
+          <Nav />
+          <TickerMarquee />
+          {children}
+          <CartButton />
+          <Analytics />
+          <SpeedInsights />
+        </CartProvider>
       </body>
     </html>
   );
