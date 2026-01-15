@@ -298,7 +298,7 @@ export default function TodayReportsPage() {
             <p className="text-text-muted mb-6">오늘 생성된 리포트가 없습니다</p>
             <button
               onClick={() => setIsSubscribeModalOpen(true)}
-              className="px-6 py-3 bg-accent-green text-black rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
+              className="px-5 py-2.5 bg-accent-green text-black rounded-lg text-sm font-semibold hover:bg-emerald-600 transition-colors"
             >
               리포트 신청하기
             </button>
@@ -325,13 +325,13 @@ export default function TodayReportsPage() {
                   setGradeFilter("all");
                   setTickerSearch("");
                 }}
-                className="px-6 py-3 bg-bg-card border border-border text-text-primary rounded-lg font-semibold hover:border-accent-green transition-colors"
+                className="px-5 py-2.5 bg-bg-card border border-border text-text-primary rounded-lg text-sm font-semibold hover:border-accent-green transition-colors"
               >
                 전체 보기
               </button>
               <button
                 onClick={() => setIsSubscribeModalOpen(true)}
-                className="px-6 py-3 bg-accent-green text-black rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
+                className="px-5 py-2.5 bg-accent-green text-black rounded-lg text-sm font-semibold hover:bg-emerald-600 transition-colors"
               >
                 리포트 신청하기
               </button>

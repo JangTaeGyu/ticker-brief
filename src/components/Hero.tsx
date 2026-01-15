@@ -92,12 +92,12 @@ export default function Hero() {
         <div className="mt-10 flex flex-col items-center gap-4">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-accent-green text-black px-8 py-4 rounded-xl font-semibold text-lg hover:bg-emerald-600 transition-colors"
+            className="bg-accent-green text-black px-6 py-3 rounded-lg font-semibold text-sm hover:bg-emerald-600 transition-colors"
           >
             리포트 신청하기
           </button>
           {reportCount !== null && reportCount > 0 && (
-            <div className="flex items-center gap-2 text-sm text-text-muted">
+            <div className="flex items-center gap-2 mt-6 text-sm text-text-muted">
               <span>현재</span>
               <span className="text-accent-green font-semibold">{animatedCount.toLocaleString()}+</span>
               <span>리포트 생성 완료</span>
