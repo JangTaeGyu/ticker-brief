@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useCartContext } from "@/contexts/CartContext";
 import CartPanel from "./CartPanel";
+import RemainingReports from "./RemainingReports";
 import { getGradeTextColor } from "@/lib/gradeColors";
 
 const STORAGE_KEY = "tickerbrief_email";
@@ -16,6 +17,7 @@ export default function CartButton() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [remainingReports, setRemainingReports] = useState<number | null>(null);
 
   const { items, count, isLoaded, removeItem, clearCart } = useCartContext();
 
@@ -34,6 +36,27 @@ export default function CartButton() {
       setSubmitStatus(null);
     }
   }, [isPanelOpen]);
+
+  // 이메일이 있을 때 남은 한도 조회
+  useEffect(() => {
+    if (!email || !email.includes("@")) {
+      setRemainingReports(null);
+      return;
+    }
+
+    const fetchLimit = async () => {
+      try {
+        const response = await fetch(`/api/check-limit?email=${encodeURIComponent(email)}`);
+        const data = await response.json();
+        setRemainingReports(data.remaining);
+      } catch (error) {
+        console.error("Check limit error:", error);
+        setRemainingReports(null);
+      }
+    };
+
+    fetchLimit();
+  }, [email, isPanelOpen]);
 
   const handleSubmit = async () => {
     setSubmitStatus(null);
@@ -74,6 +97,11 @@ export default function CartButton() {
         type: "success",
         message: `${items.length}개 티커 신청이 완료되었습니다!`,
       });
+
+      // 남은 한도 업데이트
+      if (remainingReports !== null) {
+        setRemainingReports(Math.max(0, remainingReports - items.length));
+      }
 
       // 2초 후 장바구니 비우고 패널 닫기
       setTimeout(() => {
@@ -127,40 +155,35 @@ export default function CartButton() {
           {items.map((item) => (
             <div
               key={item.ticker}
-              className="p-3 rounded-lg bg-bg-card border border-border"
+              className="p-3 rounded-lg bg-bg-card border border-border flex items-center gap-2"
             >
-              <div className="grid grid-cols-4 gap-2 text-center">
-                <div>
-                  <div className="text-xs text-text-muted mb-1">티커</div>
-                  <div className="font-bold">{item.ticker}</div>
+              <div className="flex-1 grid grid-cols-4 gap-2 text-center">
+                <div className="font-bold">{item.ticker}</div>
+                <div className={`font-semibold ${item.grade ? getGradeTextColor(item.grade) : "text-text-muted"}`}>
+                  {item.grade || "-"}
                 </div>
-                <div>
-                  <div className="text-xs text-text-muted mb-1">등급</div>
-                  <div className={`font-semibold ${item.grade ? getGradeTextColor(item.grade) : "text-text-muted"}`}>
-                    {item.grade || "-"}
-                  </div>
+                <div className={`font-semibold ${
+                  item.upside == null ? "text-text-muted" :
+                  item.upside >= 0 ? "text-accent-green" : "text-red-400"
+                }`}>
+                  {item.upside != null ? `${item.upside >= 0 ? "+" : ""}${item.upside.toFixed(1)}%` : "-"}
                 </div>
-                <div>
-                  <div className="text-xs text-text-muted mb-1">상승여력</div>
-                  <div className={`font-semibold ${
-                    item.upside == null ? "text-text-muted" :
-                    item.upside >= 0 ? "text-accent-green" : "text-red-400"
-                  }`}>
-                    {item.upside != null ? `${item.upside >= 0 ? "+" : ""}${item.upside.toFixed(1)}%` : "-"}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-text-muted mb-1">점수</div>
-                  <div className="font-semibold text-text-primary">
-                    {item.score != null ? item.score : "-"}
-                  </div>
+                <div className="font-semibold text-text-primary">
+                  {item.score != null ? item.score : "-"}
                 </div>
               </div>
               <button
                 onClick={() => removeItem(item.ticker)}
-                className="w-full mt-2 pt-2 border-t border-border text-xs text-text-muted hover:text-red-400 transition-colors"
+                className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
               >
-                제거
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clipRule="evenodd" />
+                </svg>
               </button>
             </div>
           ))}
@@ -168,6 +191,11 @@ export default function CartButton() {
 
         {/* 하단 액션 영역 */}
         <div className="mt-6 pt-4 border-t border-border space-y-4">
+          {/* 남은 한도 표시 */}
+          {remainingReports !== null && (
+            <RemainingReports remaining={remainingReports} />
+          )}
+
           {/* 이메일 입력 (저장된 이메일이 없을 때만 표시) */}
           {!hasStoredEmail && (
             <div>

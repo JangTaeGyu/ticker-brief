@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Modal from "./Modal";
+import RemainingReports from "./RemainingReports";
 
 interface TickerResult {
   symbol: string;
@@ -15,7 +16,6 @@ interface SubscribeModalProps {
 }
 
 const MAX_TICKERS = 3;
-const WEEKLY_LIMIT = 10;
 const STORAGE_KEY = "tickerbrief_email";
 
 export default function SubscribeModal({ isOpen, onClose }: SubscribeModalProps) {
@@ -295,9 +295,7 @@ export default function SubscribeModal({ isOpen, onClose }: SubscribeModalProps)
 
         {/* Remaining Reports Info */}
         {remainingReports !== null && (
-          <p className={`text-sm ${remainingReports === 0 ? "text-red-400" : "text-text-muted"}`}>
-            이번 주 남은 리포트: <span className="font-semibold text-accent-green">{remainingReports}</span> / {WEEKLY_LIMIT}
-          </p>
+          <RemainingReports remaining={remainingReports} />
         )}
 
         <button
