@@ -143,16 +143,16 @@ export default function CartButton() {
                 <div>
                   <div className="text-xs text-text-muted mb-1">상승여력</div>
                   <div className={`font-semibold ${
-                    item.upside === null ? "text-text-muted" :
+                    item.upside == null ? "text-text-muted" :
                     item.upside >= 0 ? "text-accent-green" : "text-red-400"
                   }`}>
-                    {item.upside !== null ? `${item.upside >= 0 ? "+" : ""}${item.upside.toFixed(1)}%` : "-"}
+                    {item.upside != null ? `${item.upside >= 0 ? "+" : ""}${item.upside.toFixed(1)}%` : "-"}
                   </div>
                 </div>
                 <div>
                   <div className="text-xs text-text-muted mb-1">점수</div>
                   <div className="font-semibold text-text-primary">
-                    {item.score !== null ? item.score : "-"}
+                    {item.score != null ? item.score : "-"}
                   </div>
                 </div>
               </div>
@@ -227,4 +227,3 @@ export default function CartButton() {
     </>
   );
 }
-
