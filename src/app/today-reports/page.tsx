@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ReportCard from "@/components/ReportCard";
+import SubscribeModal from "@/components/SubscribeModal";
 import { GRADE_OPTIONS } from "@/lib/gradeColors";
 
 const STORAGE_KEY = "tickerbrief_email";
 const ITEMS_PER_PAGE = 6;
 
-type FilterType = "all" | "mine";
 type GradeFilter = "all" | "A" | "B" | "C" | "D" | "F";
 
 const ALL_GRADE_OPTIONS = [
@@ -42,8 +42,10 @@ export default function TodayReportsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
-  const [filter, setFilter] = useState<FilterType>("all");
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("all");
+  const [tickerSearch, setTickerSearch] = useState("");
+  const [showMineOnly, setShowMineOnly] = useState(false);
+  const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   // localStorage에서 이메일 확인 - 없으면 메인으로 리다이렉트
@@ -91,8 +93,8 @@ export default function TodayReportsPage() {
   const filteredReports = useMemo(() => {
     let result = reports;
 
-    // 관심 필터
-    if (filter === "mine") {
+    // 관심만 보기 필터
+    if (showMineOnly) {
       result = result.filter((report) => myTickers.includes(report.ticker));
     }
 
@@ -101,13 +103,19 @@ export default function TodayReportsPage() {
       result = result.filter((report) => report.grade === gradeFilter);
     }
 
+    // 티커 검색 필터
+    if (tickerSearch.trim()) {
+      const search = tickerSearch.trim().toUpperCase();
+      result = result.filter((report) => report.ticker.includes(search));
+    }
+
     return result;
-  }, [reports, myTickers, filter, gradeFilter]);
+  }, [reports, myTickers, showMineOnly, gradeFilter, tickerSearch]);
 
   // 필터 변경 시 visibleCount 초기화
   useEffect(() => {
     setVisibleCount(ITEMS_PER_PAGE);
-  }, [filter, gradeFilter]);
+  }, [showMineOnly, gradeFilter, tickerSearch]);
 
   // 무한 스크롤 - Intersection Observer
   useEffect(() => {
@@ -134,6 +142,17 @@ export default function TodayReportsPage() {
 
   // 관심 티커 개수
   const mineCount = reports.filter((report) => myTickers.includes(report.ticker)).length;
+
+  // 등급별 개수
+  const gradeCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: reports.length };
+    reports.forEach((report) => {
+      if (report.grade) {
+        counts[report.grade] = (counts[report.grade] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [reports]);
 
   // 초기 로딩 중
   if (isLoading) {
@@ -178,67 +197,75 @@ export default function TodayReportsPage() {
           </ul>
         </div>
 
-        {/* 필터 탭 */}
+        {/* 필터 영역 */}
         {!isFetching && !error && reports.length > 0 && (
-          <div className="flex flex-col items-center gap-6 mt-14 mb-8">
-            {/* 전체/관심 필터 */}
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => setFilter("all")}
-                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-                  filter === "all"
-                    ? "bg-accent-green text-black"
-                    : "bg-bg-card border border-border text-text-secondary hover:text-text-primary"
-                }`}
-              >
-                전체
-                {reports.length > 0 && (
-                  <span className={`absolute -top-7 left-1/2 -translate-x-1/2 w-6 h-6 text-xs font-bold rounded-full flex items-center justify-center border-2 leading-none ${
-                    filter === "all"
-                      ? "bg-accent-green text-black border-bg-primary"
-                      : "bg-bg-card text-text-secondary border-accent-green"
-                  }`}>
-                    {reports.length}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => setFilter("mine")}
-                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-                  filter === "mine"
-                    ? "bg-[#f43f5e] text-white"
-                    : "bg-bg-card border border-border text-text-secondary hover:text-text-primary"
-                }`}
-              >
-                관심
-                {mineCount > 0 && (
-                  <span className={`absolute -top-7 left-1/2 -translate-x-1/2 w-6 h-6 text-xs font-bold rounded-full flex items-center justify-center border-2 leading-none ${
-                    filter === "mine"
-                      ? "bg-[#f43f5e] text-white border-bg-primary"
-                      : "bg-bg-card text-text-secondary border-[#f43f5e]"
-                  }`}>
-                    {mineCount}
-                  </span>
-                )}
-              </button>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-14 mb-8">
+            {/* 좌측: 등급 필터 */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-text-muted mr-1">등급</span>
+              {ALL_GRADE_OPTIONS.map((option) => {
+                const count = gradeCounts[option.value] || 0;
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => setGradeFilter(option.value)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                      gradeFilter === option.value
+                        ? `${option.color} text-white`
+                        : "bg-bg-card border border-border text-text-secondary hover:text-text-primary"
+                    }`}
+                  >
+                    {option.label}
+                    {count > 0 && <small className="ml-1 opacity-70">{count}</small>}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* 등급 필터 */}
-            <div className="flex flex-wrap justify-center gap-2">
-              <span className="text-xs text-text-muted mr-2 self-center">등급</span>
-              {ALL_GRADE_OPTIONS.map((option) => (
+            {/* 우측: 티커 검색 + 관심만 보기 */}
+            <div className="flex items-center gap-3">
+              {/* 관심만 보기 토글 */}
+              {mineCount > 0 && (
                 <button
-                  key={option.value}
-                  onClick={() => setGradeFilter(option.value)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    gradeFilter === option.value
-                      ? `${option.color} text-white`
+                  onClick={() => setShowMineOnly(!showMineOnly)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    showMineOnly
+                      ? "bg-[#f43f5e] text-white"
                       : "bg-bg-card border border-border text-text-secondary hover:text-text-primary"
                   }`}
                 >
-                  {option.label}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-3.5 h-3.5"
+                  >
+                    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                  </svg>
+                  <small>{mineCount}</small>
                 </button>
-              ))}
+              )}
+
+              {/* 티커 검색 */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={tickerSearch}
+                  onChange={(e) => setTickerSearch(e.target.value.toUpperCase())}
+                  placeholder="티커 검색"
+                  className="w-32 px-3 py-1.5 pl-8 bg-bg-card border border-border rounded-full text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-green transition-colors"
+                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+              </div>
             </div>
           </div>
         )}
@@ -269,33 +296,46 @@ export default function TodayReportsPage() {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📭</div>
             <p className="text-text-muted mb-6">오늘 생성된 리포트가 없습니다</p>
-            <Link
-              href="/#subscribe"
-              className="inline-block px-6 py-3 bg-accent-green text-black rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
+            <button
+              onClick={() => setIsSubscribeModalOpen(true)}
+              className="px-6 py-3 bg-accent-green text-black rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
             >
               리포트 신청하기
-            </Link>
+            </button>
           </div>
         )}
 
         {/* 필터 결과 없음 */}
         {!isFetching && !error && reports.length > 0 && filteredReports.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">{gradeFilter !== "all" ? "📊" : "💔"}</div>
+            <div className="text-6xl mb-4">
+              {tickerSearch ? "🔍" : gradeFilter !== "all" ? "📊" : "💔"}
+            </div>
             <p className="text-text-muted mb-6">
-              {gradeFilter !== "all"
+              {tickerSearch
+                ? `"${tickerSearch}" 티커를 찾을 수 없습니다`
+                : gradeFilter !== "all"
                 ? `${gradeFilter} 등급의 리포트가 없습니다`
                 : "관심 티커가 없습니다"}
             </p>
-            <button
-              onClick={() => {
-                setFilter("all");
-                setGradeFilter("all");
-              }}
-              className="px-6 py-3 bg-accent-green text-black rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
-            >
-              전체 보기
-            </button>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => {
+                  setShowMineOnly(false);
+                  setGradeFilter("all");
+                  setTickerSearch("");
+                }}
+                className="px-6 py-3 bg-bg-card border border-border text-text-primary rounded-lg font-semibold hover:border-accent-green transition-colors"
+              >
+                전체 보기
+              </button>
+              <button
+                onClick={() => setIsSubscribeModalOpen(true)}
+                className="px-6 py-3 bg-accent-green text-black rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
+              >
+                리포트 신청하기
+              </button>
+            </div>
           </div>
         )}
 
@@ -331,6 +371,12 @@ export default function TodayReportsPage() {
           </>
         )}
       </div>
+
+      {/* 구독 모달 */}
+      <SubscribeModal
+        isOpen={isSubscribeModalOpen}
+        onClose={() => setIsSubscribeModalOpen(false)}
+      />
     </main>
   );
 }
