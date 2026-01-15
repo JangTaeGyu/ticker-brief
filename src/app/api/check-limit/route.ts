@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 const WEEKLY_LIMIT = 10;
+const UNLIMITED_EMAILS = ["zelo82@naver.com", "ttggbbgg2@gmail.com"];
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -9,6 +10,11 @@ export async function GET(request: Request) {
 
   if (!email || !email.includes("@")) {
     return NextResponse.json({ remaining: WEEKLY_LIMIT, limit: WEEKLY_LIMIT });
+  }
+
+  // 무제한 이메일 체크
+  if (UNLIMITED_EMAILS.includes(email.toLowerCase())) {
+    return NextResponse.json({ remaining: 999, limit: 999, unlimited: true });
   }
 
   try {

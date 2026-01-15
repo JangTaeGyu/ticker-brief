@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { headers } from "next/headers";
 
+const UNLIMITED_EMAILS = ["zelo82@naver.com", "ttggbbgg2@gmail.com"];
+
 async function sendSlackNotification(email: string, tickers: string[]) {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) return;
@@ -98,31 +100,36 @@ export async function POST(request: Request) {
     if (existingUser) {
       requestUserId = existingUser.id;
 
-      // Check weekly report limit (10 reports per week)
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      // 무제한 이메일은 한도 체크 스킵
+      const isUnlimited = UNLIMITED_EMAILS.includes(email.toLowerCase());
 
-      const { count: weeklyReportCount } = await supabase
-        .from("reports")
-        .select("*", { count: "exact", head: true })
-        .eq("request_user_id", requestUserId)
-        .gte("created_at", oneWeekAgo.toISOString());
+      if (!isUnlimited) {
+        // Check weekly report limit (10 reports per week)
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-      const currentCount = weeklyReportCount || 0;
-      const remainingSlots = 10 - currentCount;
+        const { count: weeklyReportCount } = await supabase
+          .from("reports")
+          .select("*", { count: "exact", head: true })
+          .eq("request_user_id", requestUserId)
+          .gte("created_at", oneWeekAgo.toISOString());
 
-      if (remainingSlots <= 0) {
-        return NextResponse.json(
-          { error: "주간 리포트 신청 한도(10개)를 초과했습니다. 다음 주에 다시 시도해주세요." },
-          { status: 429 }
-        );
-      }
+        const currentCount = weeklyReportCount || 0;
+        const remainingSlots = 10 - currentCount;
 
-      if (tickers.length > remainingSlots) {
-        return NextResponse.json(
-          { error: `이번 주 남은 신청 가능 리포트는 ${remainingSlots}개입니다. 종목 수를 줄여주세요.` },
-          { status: 429 }
-        );
+        if (remainingSlots <= 0) {
+          return NextResponse.json(
+            { error: "주간 리포트 신청 한도(10개)를 초과했습니다. 다음 주에 다시 시도해주세요." },
+            { status: 429 }
+          );
+        }
+
+        if (tickers.length > remainingSlots) {
+          return NextResponse.json(
+            { error: `이번 주 남은 신청 가능 리포트는 ${remainingSlots}개입니다. 종목 수를 줄여주세요.` },
+            { status: 429 }
+          );
+        }
       }
     } else {
       const { data: newUser, error: userError } = await supabase
