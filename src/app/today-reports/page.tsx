@@ -4,11 +4,18 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ReportCard from "@/components/ReportCard";
+import { GRADE_OPTIONS } from "@/lib/gradeColors";
 
 const STORAGE_KEY = "tickerbrief_email";
 const ITEMS_PER_PAGE = 6;
 
 type FilterType = "all" | "mine";
+type GradeFilter = "all" | "A" | "B" | "C" | "D" | "F";
+
+const ALL_GRADE_OPTIONS = [
+  { value: "all" as const, label: "전체", color: "bg-text-secondary" },
+  ...GRADE_OPTIONS,
+];
 
 interface Report {
   id: string;
@@ -30,6 +37,7 @@ export default function TodayReportsPage() {
   const [isFetching, setIsFetching] = useState(false);
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [filter, setFilter] = useState<FilterType>("all");
+  const [gradeFilter, setGradeFilter] = useState<GradeFilter>("all");
   const loaderRef = useRef<HTMLDivElement>(null);
 
   // localStorage에서 이메일 확인 - 없으면 메인으로 리다이렉트
@@ -75,16 +83,25 @@ export default function TodayReportsPage() {
 
   // 필터링된 리포트
   const filteredReports = useMemo(() => {
+    let result = reports;
+
+    // 관심 필터
     if (filter === "mine") {
-      return reports.filter((report) => myTickers.includes(report.ticker));
+      result = result.filter((report) => myTickers.includes(report.ticker));
     }
-    return reports;
-  }, [reports, myTickers, filter]);
+
+    // 등급 필터
+    if (gradeFilter !== "all") {
+      result = result.filter((report) => report.grade === gradeFilter);
+    }
+
+    return result;
+  }, [reports, myTickers, filter, gradeFilter]);
 
   // 필터 변경 시 visibleCount 초기화
   useEffect(() => {
     setVisibleCount(ITEMS_PER_PAGE);
-  }, [filter]);
+  }, [filter, gradeFilter]);
 
   // 무한 스크롤 - Intersection Observer
   useEffect(() => {
@@ -157,45 +174,66 @@ export default function TodayReportsPage() {
 
         {/* 필터 탭 */}
         {!isFetching && !error && reports.length > 0 && (
-          <div className="flex justify-center gap-4 mt-14 mb-8">
-            <button
-              onClick={() => setFilter("all")}
-              className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-                filter === "all"
-                  ? "bg-accent-green text-black"
-                  : "bg-bg-card border border-border text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              전체
-              {reports.length > 0 && (
-                <span className={`absolute -top-7 left-1/2 -translate-x-1/2 w-6 h-6 text-xs font-bold rounded-full flex items-center justify-center border-2 leading-none ${
+          <div className="flex flex-col items-center gap-6 mt-14 mb-8">
+            {/* 전체/관심 필터 */}
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setFilter("all")}
+                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors ${
                   filter === "all"
-                    ? "bg-accent-green text-black border-bg-primary"
-                    : "bg-bg-card text-text-secondary border-accent-green"
-                }`}>
-                  {reports.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setFilter("mine")}
-              className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-                filter === "mine"
-                  ? "bg-[#f43f5e] text-white"
-                  : "bg-bg-card border border-border text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              관심
-              {mineCount > 0 && (
-                <span className={`absolute -top-7 left-1/2 -translate-x-1/2 w-6 h-6 text-xs font-bold rounded-full flex items-center justify-center border-2 leading-none ${
+                    ? "bg-accent-green text-black"
+                    : "bg-bg-card border border-border text-text-secondary hover:text-text-primary"
+                }`}
+              >
+                전체
+                {reports.length > 0 && (
+                  <span className={`absolute -top-7 left-1/2 -translate-x-1/2 w-6 h-6 text-xs font-bold rounded-full flex items-center justify-center border-2 leading-none ${
+                    filter === "all"
+                      ? "bg-accent-green text-black border-bg-primary"
+                      : "bg-bg-card text-text-secondary border-accent-green"
+                  }`}>
+                    {reports.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setFilter("mine")}
+                className={`relative px-5 py-2 rounded-full text-sm font-medium transition-colors ${
                   filter === "mine"
-                    ? "bg-[#f43f5e] text-white border-bg-primary"
-                    : "bg-bg-card text-text-secondary border-[#f43f5e]"
-                }`}>
-                  {mineCount}
-                </span>
-              )}
-            </button>
+                    ? "bg-[#f43f5e] text-white"
+                    : "bg-bg-card border border-border text-text-secondary hover:text-text-primary"
+                }`}
+              >
+                관심
+                {mineCount > 0 && (
+                  <span className={`absolute -top-7 left-1/2 -translate-x-1/2 w-6 h-6 text-xs font-bold rounded-full flex items-center justify-center border-2 leading-none ${
+                    filter === "mine"
+                      ? "bg-[#f43f5e] text-white border-bg-primary"
+                      : "bg-bg-card text-text-secondary border-[#f43f5e]"
+                  }`}>
+                    {mineCount}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* 등급 필터 */}
+            <div className="flex flex-wrap justify-center gap-2">
+              <span className="text-xs text-text-muted mr-2 self-center">등급</span>
+              {ALL_GRADE_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setGradeFilter(option.value)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    gradeFilter === option.value
+                      ? `${option.color} text-white`
+                      : "bg-bg-card border border-border text-text-secondary hover:text-text-primary"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -237,10 +275,17 @@ export default function TodayReportsPage() {
         {/* 필터 결과 없음 */}
         {!isFetching && !error && reports.length > 0 && filteredReports.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">💔</div>
-            <p className="text-text-muted mb-6">관심 티커가 없습니다</p>
+            <div className="text-6xl mb-4">{gradeFilter !== "all" ? "📊" : "💔"}</div>
+            <p className="text-text-muted mb-6">
+              {gradeFilter !== "all"
+                ? `${gradeFilter} 등급의 리포트가 없습니다`
+                : "관심 티커가 없습니다"}
+            </p>
             <button
-              onClick={() => setFilter("all")}
+              onClick={() => {
+                setFilter("all");
+                setGradeFilter("all");
+              }}
               className="px-6 py-3 bg-accent-green text-black rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
             >
               전체 보기

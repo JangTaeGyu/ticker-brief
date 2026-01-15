@@ -10,9 +10,11 @@ interface TickerResult {
 
 const MAX_TICKERS = 3;
 const WEEKLY_LIMIT = 10;
+const STORAGE_KEY = "tickerbrief_email";
 
 export default function FinalCTA() {
   const [email, setEmail] = useState("");
+  const [hasStoredEmail, setHasStoredEmail] = useState(false);
   const [tickerQuery, setTickerQuery] = useState("");
   const [tickerResults, setTickerResults] = useState<TickerResult[]>([]);
   const [selectedTickers, setSelectedTickers] = useState<TickerResult[]>([]);
@@ -24,6 +26,15 @@ export default function FinalCTA() {
   const [remainingReports, setRemainingReports] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load email from localStorage
+  useEffect(() => {
+    const storedEmail = localStorage.getItem(STORAGE_KEY);
+    if (storedEmail) {
+      setEmail(storedEmail);
+      setHasStoredEmail(true);
+    }
+  }, []);
 
   // Update dropdown position when showing
   useEffect(() => {

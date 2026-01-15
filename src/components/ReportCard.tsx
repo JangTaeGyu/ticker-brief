@@ -1,5 +1,7 @@
 "use client";
 
+import { getGradeTextColor } from "@/lib/gradeColors";
+
 interface ReportCardProps {
   ticker: string;
   status: string;
@@ -15,33 +17,6 @@ const statusMessages: Record<string, { message: string; borderColor: string; tex
   processing: { message: "리포트를 생성하고 있습니다", borderColor: "border-blue-500", textColor: "text-blue-500" },
   failed: { message: "리포트 생성에 실패했습니다", borderColor: "border-red-500", textColor: "text-red-500" },
 };
-
-// 등급별 색상 (TickerMarquee와 동일)
-function getGradeColor(grade: string | null): { text: string; bg: string } {
-  switch (grade?.toUpperCase()) {
-    case "A+급":
-    case "A급":
-      return { text: "text-[#10b981]", bg: "bg-[#10b981]/20" }; // green
-    case "A-급":
-    case "B+급":
-      return { text: "text-[#34d399]", bg: "bg-[#34d399]/20" }; // emerald
-    case "B급":
-    case "B-급":
-      return { text: "text-[#06b6d4]", bg: "bg-[#06b6d4]/20" }; // cyan
-    case "C+급":
-    case "C급":
-      return { text: "text-[#facc15]", bg: "bg-[#facc15]/20" }; // yellow
-    case "C-급":
-    case "D+급":
-      return { text: "text-[#f97316]", bg: "bg-[#f97316]/20" }; // orange
-    case "D급":
-    case "D-급":
-    case "F급":
-      return { text: "text-[#ef4444]", bg: "bg-[#ef4444]/20" }; // red
-    default:
-      return { text: "text-text-muted", bg: "bg-text-muted/20" };
-  }
-}
 
 // 업사이드별 색상 (TickerMarquee와 동일)
 function getUpsideColor(upside: number | null): string {
@@ -73,7 +48,6 @@ export default function ReportCard({
   score,
   isMine,
 }: ReportCardProps) {
-  const gradeStyle = getGradeColor(grade ?? null);
   const isNotCompleted = status !== "completed";
   const statusInfo = statusMessages[status];
 
@@ -107,7 +81,7 @@ export default function ReportCard({
           <div className="text-center">
             <div className="text-xs text-text-muted mb-1">등급</div>
             {grade ? (
-              <div className={`text-lg font-bold ${gradeStyle.text}`}>
+              <div className={`text-lg font-bold ${getGradeTextColor(grade)}`}>
                 {grade}
               </div>
             ) : (
@@ -115,9 +89,9 @@ export default function ReportCard({
             )}
           </div>
 
-          {/* 업사이드 */}
+          {/* 상승여력 */}
           <div className="text-center">
-            <div className="text-xs text-text-muted mb-1">업사이드</div>
+            <div className="text-xs text-text-muted mb-1">상승여력</div>
             {upside !== null && upside !== undefined ? (
               <div className={`text-lg font-bold ${getUpsideColor(upside)}`}>
                 {upside >= 0 ? "+" : ""}

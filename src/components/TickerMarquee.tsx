@@ -1,38 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getGradeTextColor } from "@/lib/gradeColors";
 
 interface TickerData {
   ticker: string;
   score: number | null;
   grade: string | null;
   upside: number | null;
-}
-
-function getGradeColor(grade: string | null): string {
-  switch (grade?.toUpperCase()) {
-    case "A+급":
-    case "A급":
-      return "text-[#10b981]"; // green
-    case "A-급":
-    case "B+급":
-      return "text-[#34d399]"; // emerald
-    case "B급":
-    case "B-급":
-      return "text-[#06b6d4]"; // cyan
-    case "C+급":
-    case "C급":
-      return "text-[#facc15]"; // yellow
-    case "C-급":
-    case "D+급":
-      return "text-[#f97316]"; // orange
-    case "D급":
-    case "D-급":
-    case "F급":
-      return "text-[#ef4444]"; // red
-    default:
-      return "text-text-muted";
-  }
 }
 
 function getUpsideColor(upside: number | null): string {
@@ -67,12 +42,12 @@ export default function TickerMarquee() {
     <span className="mx-6 text-xs font-['JetBrains_Mono'] flex items-center gap-2 shrink-0">
       <span className="text-text-primary font-semibold">{item.ticker}</span>
       {item.score !== null && (
-        <span className={`${getGradeColor(item.grade)}`}>
+        <span className={`${getGradeTextColor(item.grade)}`}>
           {item.score.toFixed(1)}
         </span>
       )}
       {item.grade && (
-        <span className={`font-bold ${getGradeColor(item.grade)}`}>
+        <span className={`font-bold ${getGradeTextColor(item.grade)}`}>
           {item.grade}
         </span>
       )}
