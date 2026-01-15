@@ -140,7 +140,7 @@ export default function ReportCard({
                   <span className="flex items-center gap-1">
                     <span>💡</span> 투자 요약
                   </span>
-                  <span className="text-accent-green opacity-0 group-hover:opacity-100 transition-opacity text-xs">
+                  <span className="text-accent-green text-xs max-md:opacity-100 opacity-0 group-hover:opacity-100 transition-opacity">
                     자세히 보기 →
                   </span>
                 </div>
@@ -160,7 +160,7 @@ export default function ReportCard({
                   <span className="flex items-center gap-1">
                     <span>📊</span> 투자 논거
                   </span>
-                  <span className="text-accent-green opacity-0 group-hover:opacity-100 transition-opacity text-xs">
+                  <span className="text-accent-green text-xs max-md:opacity-100 opacity-0 group-hover:opacity-100 transition-opacity">
                     자세히 보기 →
                   </span>
                 </div>
