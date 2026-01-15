@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ReportCard from "@/components/ReportCard";
 import SubscribeModal from "@/components/SubscribeModal";
@@ -173,9 +172,6 @@ export default function TodayReportsPage() {
           <h1 className="text-4xl font-bold mb-4">
             오늘의 <span className="text-accent-green">리포트</span>
           </h1>
-          <p className="text-text-muted">
-            매일 오전 7시 10분에 새로운 리포트가 생성됩니다
-          </p>
         </div>
 
         {/* 안내사항 */}
@@ -192,7 +188,11 @@ export default function TodayReportsPage() {
             </li>
             <li className="flex gap-2">
               <span className="text-accent-green">•</span>
-              <span>목록에 없는 티커는 <Link href="/#subscribe" className="text-accent-green hover:underline">티커 신청</Link>을 통해 추가할 수 있습니다.</span>
+              <span>목록에 없는 티커는 <button onClick={() => setIsSubscribeModalOpen(true)} className="text-accent-green hover:underline">리포트 신청</button>을 통해 추가할 수 있습니다.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-accent-green">•</span>
+              <span>직접 신청한 리포트는 이메일로 더 상세한 분석 내용을 받아보실 수 있습니다.</span>
             </li>
           </ul>
         </div>
