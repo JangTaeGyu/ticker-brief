@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import SubscribeModal from "./SubscribeModal";
 
 function useCountUp(end: number, duration: number = 2000) {
   const [count, setCount] = useState(0);
@@ -39,6 +40,7 @@ function useCountUp(end: number, duration: number = 2000) {
 
 export default function Hero() {
   const [reportCount, setReportCount] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const animatedCount = useCountUp(reportCount || 0, 1500);
 
   useEffect(() => {
@@ -86,18 +88,26 @@ export default function Hero() {
           <span className="flex items-center gap-1.5">✓ 10분 내 발송</span>
         </div>
 
-        {/* Report Count Badge */}
-        {reportCount !== null && reportCount > 0 && (
-          <div className="mt-8 inline-flex items-baseline gap-2 text-sm text-text-secondary">
-            <span className="bg-accent-green text-black px-2 py-1 rounded text-xs font-bold translate-y-[-1px]">
-              현재
-            </span>
-            <span>
-              <span className="text-accent-green font-bold text-lg">{animatedCount.toLocaleString()}+</span> 리포트 발송 완료
-            </span>
-          </div>
-        )}
+        {/* CTA Section */}
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-accent-green text-black px-8 py-4 rounded-xl font-semibold text-lg hover:bg-emerald-600 transition-colors"
+          >
+            리포트 신청하기
+          </button>
+          {reportCount !== null && reportCount > 0 && (
+            <div className="flex items-center gap-2 text-sm text-text-muted">
+              <span>현재</span>
+              <span className="text-accent-green font-semibold">{animatedCount.toLocaleString()}+</span>
+              <span>리포트 생성 완료</span>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Subscribe Modal */}
+      <SubscribeModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );
 }
