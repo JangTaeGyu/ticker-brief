@@ -15,7 +15,7 @@ interface SubscribeModalProps {
   onClose: () => void;
 }
 
-const MAX_TICKERS = 3;
+const MAX_TICKERS = 5;
 const STORAGE_KEY = "tickerbrief_email";
 
 export default function SubscribeModal({ isOpen, onClose }: SubscribeModalProps) {
@@ -224,7 +224,7 @@ export default function SubscribeModal({ isOpen, onClose }: SubscribeModalProps)
             value={tickerQuery}
             onChange={(e) => handleTickerInputChange(e.target.value)}
             onFocus={() => tickerResults.length > 0 && setShowDropdown(true)}
-            placeholder="티커 검색 (최대 3개)"
+            placeholder="티커 검색 (최대 5개)"
             autoComplete="off"
             className="w-full px-4 py-3 bg-bg-primary border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-green transition-colors"
           />

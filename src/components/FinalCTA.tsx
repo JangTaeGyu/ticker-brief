@@ -8,7 +8,7 @@ interface TickerResult {
   name: string;
 }
 
-const MAX_TICKERS = 3;
+const MAX_TICKERS = 5;
 const WEEKLY_LIMIT = 10;
 const STORAGE_KEY = "tickerbrief_email";
 
@@ -219,7 +219,7 @@ export default function FinalCTA() {
               value={tickerQuery}
               onChange={(e) => handleTickerInputChange(e.target.value)}
               onFocus={() => tickerResults.length > 0 && setShowDropdown(true)}
-              placeholder="티커 검색 (최대 3개)"
+              placeholder="티커 검색 (최대 5개)"
               autoComplete="off"
               className="w-[200px] px-5 py-4 bg-bg-card border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-green transition-colors max-md:w-full"
             />

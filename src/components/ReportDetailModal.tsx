@@ -64,6 +64,13 @@ export default function ReportDetailModal({
       maxWidth="max-w-2xl"
     >
       <div className="space-y-6">
+        {/* 안내 문구 */}
+        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center">
+          <p className="text-sm text-amber-400">
+            리포트를 신청하시면 <strong>31가지 항목</strong>이 포함된 상세 분석 리포트를 받아보실 수 있습니다.
+          </p>
+        </div>
+
         {/* 핵심 지표 */}
         <div className="grid grid-cols-3 gap-4 p-4 rounded-xl bg-bg-card border border-border">
           <div className="text-center">
@@ -105,9 +112,11 @@ export default function ReportDetailModal({
             <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
               <span>💡</span> 투자 요약
             </h3>
-            <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
-              {summary}
-            </p>
+            <div className="p-4 rounded-xl bg-bg-card border border-border">
+              <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+                {summary}
+              </p>
+            </div>
           </div>
         )}
 
@@ -117,9 +126,11 @@ export default function ReportDetailModal({
             <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
               <span>📊</span> 투자 논거
             </h3>
-            <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
-              {thesis}
-            </p>
+            <div className="p-4 rounded-xl bg-bg-card border border-border">
+              <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+                {thesis}
+              </p>
+            </div>
           </div>
         )}
 
@@ -156,23 +167,27 @@ export default function ReportDetailModal({
             <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
               <span>🌱</span> ESG 평가
             </h3>
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-bg-card border border-border">
-              {esgRating && (
-                <div className="text-center">
-                  <div className="text-xs text-text-muted mb-1">등급</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-bg-card border border-border text-center">
+                <div className="text-xs text-text-muted mb-2">등급</div>
+                {esgRating ? (
                   <span className={`inline-block px-3 py-1 rounded text-lg font-bold ${esgColor.bg} ${esgColor.text}`}>
                     {esgRating}
                   </span>
-                </div>
-              )}
-              {esgScore !== null && esgScore !== undefined && (
-                <div className="text-center">
-                  <div className="text-xs text-text-muted mb-1">점수</div>
+                ) : (
+                  <span className="text-text-muted">-</span>
+                )}
+              </div>
+              <div className="p-4 rounded-xl bg-bg-card border border-border text-center">
+                <div className="text-xs text-text-muted mb-2">점수</div>
+                {esgScore !== null && esgScore !== undefined ? (
                   <span className="text-lg font-bold text-text-primary">
                     {esgScore}점
                   </span>
-                </div>
-              )}
+                ) : (
+                  <span className="text-text-muted">-</span>
+                )}
+              </div>
             </div>
           </div>
         )}
