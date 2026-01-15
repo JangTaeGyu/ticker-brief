@@ -41,4 +41,4 @@ build/
 # Project
 tasks/
 reports/
-sample/
+sample/tsconfig.tsbuildinfo
