@@ -34,3 +34,13 @@ export const GRADE_OPTIONS = Object.entries(GRADE_COLORS).map(([value, { bg }]) 
   label: value,
   color: bg,
 }));
+
+// ESG 등급별 색상 (text, bg with opacity)
+export function getEsgColor(rating: string | null): { text: string; bg: string } {
+  if (!rating) return { text: "text-text-muted", bg: "bg-text-muted/20" };
+  const color = GRADE_COLORS[rating.toUpperCase()];
+  if (color) {
+    return { text: color.text, bg: `${color.bg}/20` };
+  }
+  return { text: "text-text-muted", bg: "bg-text-muted/20" };
+}

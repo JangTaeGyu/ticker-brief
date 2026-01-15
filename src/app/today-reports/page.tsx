@@ -24,6 +24,12 @@ interface Report {
   score: number | null;
   grade: string | null;
   upside: number | null;
+  summary: string | null;
+  thesis: string | null;
+  entry_strategy: string | null;
+  exit_strategy: string | null;
+  esg_rating: string | null;
+  esg_score: number | null;
   created_at: string;
 }
 
@@ -305,6 +311,12 @@ export default function TodayReportsPage() {
                   grade={report.grade}
                   upside={report.upside}
                   score={report.score}
+                  summary={report.summary}
+                  thesis={report.thesis}
+                  entryStrategy={report.entry_strategy}
+                  exitStrategy={report.exit_strategy}
+                  esgRating={report.esg_rating}
+                  esgScore={report.esg_score}
                   isMine={myTickers.includes(report.ticker)}
                 />
               ))}

@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     // 3. 오늘의 전체 리포트 조회 (7시 ~ 다음날 7시)
     const { data: reports, error } = await supabase
       .from("reports")
-      .select("id, ticker, status, score, grade, upside, created_at")
+      .select("id, ticker, status, score, grade, upside, summary, thesis, entry_strategy, exit_strategy, esg_rating, esg_score, created_at")
       .gte("created_at", start)
       .lt("created_at", end)
       .order("created_at", { ascending: false });
