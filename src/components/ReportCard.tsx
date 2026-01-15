@@ -83,25 +83,22 @@ export default function ReportCard({
         ? `opacity-50 ${statusInfo?.borderColor || "border-border"}`
         : "border-border hover:border-accent-green/50"
     }`}>
-      {/* 관심 티커 아이콘 */}
-      {isMine && (
-        <div
-          className="absolute top-3 right-3"
-          title="관심 티커"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="#f43f5e"
-            className="w-6 h-6"
-          >
-            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-          </svg>
-        </div>
-      )}
-
-      {/* 티커 */}
-      <div className="text-2xl font-bold mb-4">{ticker}</div>
+      {/* 티커 + 관심 아이콘 */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-2xl font-bold">{ticker}</div>
+        {isMine && (
+          <span title="관심 티커">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="#f43f5e"
+              className="w-6 h-6"
+            >
+              <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+            </svg>
+          </span>
+        )}
+      </div>
 
       {/* 완료된 경우 상세 정보 표시 */}
       {status === "completed" && (

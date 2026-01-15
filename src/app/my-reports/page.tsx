@@ -143,6 +143,25 @@ export default function MyReportsPage() {
             </p>
           </div>
 
+          {/* 안내사항 */}
+          <div className="max-w-2xl mx-auto mb-10 p-5 rounded-xl bg-bg-card border border-border">
+            <h3 className="text-sm font-semibold text-text-primary mb-3">안내사항</h3>
+            <ul className="space-y-2 text-sm text-text-muted">
+              <li className="flex gap-2">
+                <span className="text-accent-green">•</span>
+                <span>미국 정규장 마감(한국시간 06:00) 이후 데이터가 반영되어 07:10에 리포트가 자동 생성됩니다.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-accent-green">•</span>
+                <span>오늘의 리포트는 신청된 티커를 기준으로 자동 생성됩니다.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-accent-green">•</span>
+                <span>목록에 없는 티커는 <Link href="/#subscribe" className="text-accent-green hover:underline">티커 신청</Link>을 통해 추가할 수 있습니다.</span>
+              </li>
+            </ul>
+          </div>
+
           {/* 필터 탭 */}
           {!isFetching && !error && reports.length > 0 && (
             <div className="flex justify-center gap-4 mt-14 mb-8">
