@@ -71,9 +71,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (tickers.length > 3) {
+    if (tickers.length > 5) {
       return NextResponse.json(
-        { error: "최대 3개의 종목만 선택 가능합니다." },
+        { error: "최대 5개의 종목만 선택 가능합니다." },
         { status: 400 }
       );
     }
