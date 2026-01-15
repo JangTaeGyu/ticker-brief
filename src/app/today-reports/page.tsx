@@ -64,7 +64,7 @@ export default function TodayReportsPage() {
     setError(null);
 
     try {
-      const res = await fetch(`/api/my-reports?email=${encodeURIComponent(userEmail)}`);
+      const res = await fetch(`/api/today-reports?email=${encodeURIComponent(userEmail)}`);
       const data = await res.json();
 
       if (!res.ok) {

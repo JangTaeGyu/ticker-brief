@@ -50,14 +50,35 @@ export async function GET(request: NextRequest) {
     // 시간 범위 계산
     const { start, end } = getTodayRange();
 
-    // 1. 해당 이메일의 사용자 조회
-    const { data: user } = await supabase
-      .from("request_users")
-      .select("id")
-      .eq("email", email)
-      .single();
+    // 병렬로 쿼리 실행
+    const [userResult, reportsResult] = await Promise.all([
+      // 1. 해당 이메일의 사용자 조회
+      supabase
+        .from("request_users")
+        .select("id")
+        .eq("email", email)
+        .single(),
+      // 2. 오늘의 전체 리포트 조회 (7시 ~ 다음날 7시)
+      supabase
+        .from("reports")
+        .select("id, ticker, status, score, grade, upside, summary, thesis, entry_strategy, exit_strategy, esg_rating, esg_score, created_at")
+        .gte("created_at", start)
+        .lt("created_at", end)
+        .order("created_at", { ascending: false }),
+    ]);
 
-    // 2. 사용자가 신청한 티커 목록 조회
+    const { data: user } = userResult;
+    const { data: reports, error } = reportsResult;
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return NextResponse.json(
+        { error: "리포트 조회 중 오류가 발생했습니다" },
+        { status: 500 }
+      );
+    }
+
+    // 3. 사용자가 신청한 티커 목록 조회
     let myTickers: string[] = [];
     if (user) {
       const { data: userReports } = await supabase
@@ -70,24 +91,17 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 3. 오늘의 전체 리포트 조회 (7시 ~ 다음날 7시)
-    const { data: reports, error } = await supabase
-      .from("reports")
-      .select("id, ticker, status, score, grade, upside, summary, thesis, entry_strategy, exit_strategy, esg_rating, esg_score, created_at")
-      .gte("created_at", start)
-      .lt("created_at", end)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Supabase error:", error);
-      return NextResponse.json(
-        { error: "리포트 조회 중 오류가 발생했습니다" },
-        { status: 500 }
-      );
-    }
+    // 4. 중복 티커 제거 (최신 리포트만 유지)
+    const tickerMap = new Map<string, typeof reports[0]>();
+    reports?.forEach((report) => {
+      if (!tickerMap.has(report.ticker)) {
+        tickerMap.set(report.ticker, report);
+      }
+    });
+    const uniqueReports = Array.from(tickerMap.values());
 
     return NextResponse.json({
-      reports: reports || [],
+      reports: uniqueReports,
       myTickers,
       range: { start, end },
     });
