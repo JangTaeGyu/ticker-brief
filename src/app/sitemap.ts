@@ -1,31 +1,37 @@
 import { MetadataRoute } from "next";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://ticker-brief.jubrolab.dev";
+const BASE_URL = "https://ticker-brief.jubrolab.dev";
 
+export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: baseUrl,
+      url: BASE_URL,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: "daily",
       priority: 1,
     },
     {
-      url: `${baseUrl}/terms`,
+      url: `${BASE_URL}/today-reports`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/terms`,
+      lastModified: new Date("2025-01-01"),
+      changeFrequency: "yearly",
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
+      url: `${BASE_URL}/privacy`,
+      lastModified: new Date("2025-01-01"),
+      changeFrequency: "yearly",
       priority: 0.3,
     },
     {
-      url: `${baseUrl}/disclaimer`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
+      url: `${BASE_URL}/disclaimer`,
+      lastModified: new Date("2025-01-01"),
+      changeFrequency: "yearly",
       priority: 0.3,
     },
   ];
