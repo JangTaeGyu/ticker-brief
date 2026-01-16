@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { VirtuosoGrid } from "react-virtuoso";
 import ReportCard from "@/components/ReportCard";
 import SubscribeModal from "@/components/SubscribeModal";
 import { GRADE_OPTIONS } from "@/lib/gradeColors";
 
 const STORAGE_KEY = "tickerbrief_email";
-const ITEMS_PER_PAGE = 6;
 
 type GradeFilter = "all" | "A" | "B" | "C" | "D" | "F";
 
@@ -40,12 +40,10 @@ export default function TodayReportsPage() {
   const [myTickers, setMyTickers] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isFetching, setIsFetching] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("all");
   const [tickerSearch, setTickerSearch] = useState("");
   const [showMineOnly, setShowMineOnly] = useState(false);
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
-  const loaderRef = useRef<HTMLDivElement>(null);
 
   // localStorage에서 이메일 확인 - 없으면 메인으로 리다이렉트
   useEffect(() => {
@@ -73,7 +71,6 @@ export default function TodayReportsPage() {
 
       setReports(data.reports || []);
       setMyTickers(data.myTickers || []);
-      setVisibleCount(ITEMS_PER_PAGE);
     } catch (err) {
       setError(err instanceof Error ? err.message : "오류가 발생했습니다");
     } finally {
@@ -110,34 +107,6 @@ export default function TodayReportsPage() {
 
     return result;
   }, [reports, myTickers, showMineOnly, gradeFilter, tickerSearch]);
-
-  // 필터 변경 시 visibleCount 초기화
-  useEffect(() => {
-    setVisibleCount(ITEMS_PER_PAGE);
-  }, [showMineOnly, gradeFilter, tickerSearch]);
-
-  // 무한 스크롤 - Intersection Observer
-  useEffect(() => {
-    const loader = loaderRef.current;
-    if (!loader) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && visibleCount < filteredReports.length) {
-          setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filteredReports.length));
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(loader);
-
-    return () => observer.disconnect();
-  }, [visibleCount, filteredReports.length]);
-
-  // 표시할 리포트
-  const visibleReports = filteredReports.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredReports.length;
 
   // 관심 티커 개수
   const mineCount = reports.filter((report) => myTickers.includes(report.ticker)).length;
@@ -339,11 +308,16 @@ export default function TodayReportsPage() {
           </div>
         )}
 
-        {/* 리포트 목록 */}
+        {/* 리포트 목록 - 가상 스크롤 */}
         {!isFetching && !error && filteredReports.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visibleReports.map((report) => (
+          <VirtuosoGrid
+            useWindowScroll
+            totalCount={filteredReports.length}
+            overscan={200}
+            listClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            itemContent={(index) => {
+              const report = filteredReports[index];
+              return (
                 <ReportCard
                   key={report.id}
                   ticker={report.ticker}
@@ -359,16 +333,9 @@ export default function TodayReportsPage() {
                   esgScore={report.esg_score}
                   isMine={myTickers.includes(report.ticker)}
                 />
-              ))}
-            </div>
-
-            {/* 더 보기 로더 */}
-            {hasMore && (
-              <div ref={loaderRef} className="text-center py-8">
-                <div className="animate-spin w-6 h-6 border-2 border-accent-green border-t-transparent rounded-full mx-auto" />
-              </div>
-            )}
-          </>
+              );
+            }}
+          />
         )}
       </div>
 
