@@ -38,6 +38,7 @@ export default function Nav() {
             alt="TickerBrief"
             width={40}
             height={40}
+            priority
             className="rounded-[10px]"
           />
           <div className="text-[22px] font-bold text-text-primary tracking-tight">
