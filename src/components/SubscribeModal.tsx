@@ -1,191 +1,53 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Modal from "./Modal";
 import RemainingReports from "./RemainingReports";
+import { useTickerSearch } from "@/hooks/useTickerSearch";
+import { useSubscriptionForm } from "@/hooks/useSubscriptionForm";
 
-interface TickerResult {
-  symbol: string;
-  name: string;
-}
+const MAX_TICKERS = 5;
 
 interface SubscribeModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const MAX_TICKERS = 5;
-const STORAGE_KEY = "tickerbrief_email";
-
 export default function SubscribeModal({ isOpen, onClose }: SubscribeModalProps) {
-  const [email, setEmail] = useState("");
-  const [hasStoredEmail, setHasStoredEmail] = useState(false);
-  const [tickerQuery, setTickerQuery] = useState("");
-  const [tickerResults, setTickerResults] = useState<TickerResult[]>([]);
-  const [selectedTickers, setSelectedTickers] = useState<TickerResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [remainingReports, setRemainingReports] = useState<number | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const {
+    tickerQuery,
+    selectedTickers,
+    isSearching,
+    showDropdown,
+    dropdownPosition,
+    filteredResults,
+    dropdownRef,
+    inputRef,
+    handleTickerInputChange,
+    handleTickerSelect,
+    handleRemoveTicker,
+    setShowDropdown,
+    clearSelectedTickers,
+  } = useTickerSearch({ maxTickers: MAX_TICKERS, useScrollOffset: false });
 
-  // Load email from localStorage
-  useEffect(() => {
-    const storedEmail = localStorage.getItem(STORAGE_KEY);
-    if (storedEmail) {
-      setEmail(storedEmail);
-      setHasStoredEmail(true);
-    }
-  }, []);
-
-  // Update dropdown position when showing
-  useEffect(() => {
-    if (showDropdown && inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + 4,
-        left: rect.left,
-        width: rect.width,
-      });
-    }
-  }, [showDropdown, tickerResults]);
-
-  // Debounced search
-  useEffect(() => {
-    if (!tickerQuery || tickerQuery.length < 1) {
-      setTickerResults([]);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const response = await fetch(`/api/search-ticker?q=${encodeURIComponent(tickerQuery)}`);
-        const data = await response.json();
-        setTickerResults(data);
-        setShowDropdown(true);
-      } catch (error) {
-        console.error("Search error:", error);
-        setTickerResults([]);
-      }
-      setIsSearching(false);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [tickerQuery]);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setShowDropdown(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Check remaining reports when email changes
-  useEffect(() => {
-    if (!email || !email.includes("@")) {
-      setRemainingReports(null);
-      return;
-    }
-
-    const timer = setTimeout(async () => {
-      try {
-        const response = await fetch(`/api/check-limit?email=${encodeURIComponent(email)}`);
-        const data = await response.json();
-        setRemainingReports(data.remaining);
-      } catch (error) {
-        console.error("Check limit error:", error);
-        setRemainingReports(null);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [email]);
-
-  const handleTickerSelect = (ticker: TickerResult) => {
-    if (selectedTickers.some((t) => t.symbol === ticker.symbol)) {
-      return;
-    }
-    if (selectedTickers.length >= MAX_TICKERS) {
-      return;
-    }
-    setSelectedTickers([...selectedTickers, ticker]);
-    setTickerQuery("");
-    setShowDropdown(false);
-  };
-
-  const handleRemoveTicker = (symbol: string) => {
-    setSelectedTickers(selectedTickers.filter((t) => t.symbol !== symbol));
-  };
-
-  const handleTickerInputChange = (value: string) => {
-    setTickerQuery(value.toUpperCase());
-  };
+  const {
+    email,
+    hasStoredEmail,
+    remainingReports,
+    isSubmitting,
+    submitStatus,
+    setEmail,
+    handleSubmit: submitForm,
+  } = useSubscriptionForm({
+    onSuccess: () => {
+      clearSelectedTickers();
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitStatus(null);
-
-    if (!email || !email.includes("@")) {
-      setSubmitStatus({ type: "error", message: "유효한 이메일 주소를 입력해주세요." });
-      return;
-    }
-
-    if (selectedTickers.length === 0) {
-      setSubmitStatus({ type: "error", message: "최소 1개의 종목을 선택해주세요." });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch("/api/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          tickers: selectedTickers.map((t) => t.symbol),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "신청 중 오류가 발생했습니다.");
-      }
-
-      setSubmitStatus({ type: "success", message: "신청이 완료되었습니다! 곧 리포트를 받아보실 수 있습니다." });
-      if (remainingReports !== null) {
-        setRemainingReports(Math.max(0, remainingReports - selectedTickers.length));
-      }
-      setEmail("");
-      setSelectedTickers([]);
-    } catch (error) {
-      setSubmitStatus({
-        type: "error",
-        message: error instanceof Error ? error.message : "신청 중 오류가 발생했습니다.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    await submitForm(selectedTickers.map((t) => t.symbol));
   };
-
-  const filteredResults = tickerResults.filter(
-    (ticker) => !selectedTickers.some((t) => t.symbol === ticker.symbol)
-  );
 
   return (
     <Modal
@@ -223,7 +85,7 @@ export default function SubscribeModal({ isOpen, onClose }: SubscribeModalProps)
             name="ticker"
             value={tickerQuery}
             onChange={(e) => handleTickerInputChange(e.target.value)}
-            onFocus={() => tickerResults.length > 0 && setShowDropdown(true)}
+            onFocus={() => filteredResults.length > 0 && setShowDropdown(true)}
             placeholder="티커 검색 (최대 5개)"
             autoComplete="off"
             className="w-full px-4 py-3 bg-bg-primary border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-green transition-colors"
