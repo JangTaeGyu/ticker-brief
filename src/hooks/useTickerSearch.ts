@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, RefObject } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, RefObject } from "react";
 
 export interface TickerResult {
   symbol: string;
@@ -15,7 +15,7 @@ interface DropdownPosition {
 
 interface UseTickerSearchOptions {
   maxTickers?: number;
-  useScrollOffset?: boolean; // FinalCTA에서는 true, SubscribeModal에서는 false
+  useScrollOffset?: boolean;
   minDropdownWidth?: number;
 }
 
@@ -113,33 +113,38 @@ export function useTickerSearch(options: UseTickerSearchOptions = {}): UseTicker
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleTickerInputChange = (value: string) => {
+  const handleTickerInputChange = useCallback((value: string) => {
     setTickerQuery(value.toUpperCase());
-  };
+  }, []);
 
-  const handleTickerSelect = (ticker: TickerResult) => {
-    if (selectedTickers.some((t) => t.symbol === ticker.symbol)) {
-      return;
-    }
-    if (selectedTickers.length >= maxTickers) {
-      return;
-    }
-    setSelectedTickers([...selectedTickers, ticker]);
+  const handleTickerSelect = useCallback((ticker: TickerResult) => {
+    setSelectedTickers((prev) => {
+      if (prev.some((t) => t.symbol === ticker.symbol)) {
+        return prev;
+      }
+      if (prev.length >= maxTickers) {
+        return prev;
+      }
+      return [...prev, ticker];
+    });
     setTickerQuery("");
     setShowDropdown(false);
-  };
+  }, [maxTickers]);
 
-  const handleRemoveTicker = (symbol: string) => {
-    setSelectedTickers(selectedTickers.filter((t) => t.symbol !== symbol));
-  };
+  const handleRemoveTicker = useCallback((symbol: string) => {
+    setSelectedTickers((prev) => prev.filter((t) => t.symbol !== symbol));
+  }, []);
 
-  const clearSelectedTickers = () => {
+  const clearSelectedTickers = useCallback(() => {
     setSelectedTickers([]);
-  };
+  }, []);
 
-  const filteredResults = tickerResults.filter(
-    (ticker) => !selectedTickers.some((t) => t.symbol === ticker.symbol)
-  );
+  // 선택되지 않은 검색 결과만 필터링
+  const filteredResults = useMemo(() => {
+    return tickerResults.filter(
+      (ticker) => !selectedTickers.some((t) => t.symbol === ticker.symbol)
+    );
+  }, [tickerResults, selectedTickers]);
 
   return {
     // State

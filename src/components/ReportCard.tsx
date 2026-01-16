@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo, useCallback } from "react";
 import { getGradeTextColor, getEsgColor, getUpsideColor, getScoreColor, getStatusColor } from "@/lib/gradeColors";
 import { useCartContext } from "@/contexts/CartContext";
 import ReportDetailModal from "./ReportDetailModal";
@@ -20,7 +20,7 @@ interface ReportCardProps {
   isMine: boolean;
 }
 
-export default function ReportCard({
+const ReportCard = memo(function ReportCard({
   ticker,
   status,
   grade,
@@ -41,12 +41,15 @@ export default function ReportCard({
   const esgColor = getEsgColor(esgRating ?? null);
   const inCart = isInCart(ticker);
 
-  const handleCartToggle = (e: React.MouseEvent) => {
+  const handleCartToggle = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (status === "completed") {
       toggleItem({ ticker, grade: grade ?? null, upside: upside ?? null, score: score ?? null });
     }
-  };
+  }, [status, ticker, grade, upside, score, toggleItem]);
+
+  const openModal = useCallback(() => setIsModalOpen(true), []);
+  const closeModal = useCallback(() => setIsModalOpen(false), []);
 
   return (
     <>
@@ -150,7 +153,7 @@ export default function ReportCard({
             {summary && (
               <div
                 className="mt-4 pt-4 border-t border-border cursor-pointer group"
-                onClick={() => setIsModalOpen(true)}
+                onClick={openModal}
               >
                 <div className="text-xs text-text-muted mb-2 flex items-center justify-between">
                   <span className="flex items-center gap-1">
@@ -170,7 +173,7 @@ export default function ReportCard({
             {thesis && !summary && (
               <div
                 className="mt-4 pt-4 border-t border-border cursor-pointer group"
-                onClick={() => setIsModalOpen(true)}
+                onClick={openModal}
               >
                 <div className="text-xs text-text-muted mb-2 flex items-center justify-between">
                   <span className="flex items-center gap-1">
@@ -243,7 +246,7 @@ export default function ReportCard({
       {/* 상세 정보 모달 */}
       <ReportDetailModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModal}
         ticker={ticker}
         grade={grade}
         upside={upside}
@@ -257,4 +260,6 @@ export default function ReportCard({
       />
     </>
   );
-}
+});
+
+export default ReportCard;

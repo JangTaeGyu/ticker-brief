@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { getGradeTextColor, getUpsideColor } from "@/lib/gradeColors";
 
 interface TickerData {
@@ -10,25 +10,9 @@ interface TickerData {
   upside: number | null;
 }
 
-export default function TickerMarquee() {
-  const [tickers, setTickers] = useState<TickerData[]>([]);
-
-  useEffect(() => {
-    async function fetchTickers() {
-      try {
-        const response = await fetch("/api/top-tickers");
-        const data = await response.json();
-        setTickers(data.tickers);
-      } catch (error) {
-        console.error("Tickers fetch error:", error);
-      }
-    }
-    fetchTickers();
-  }, []);
-
-  if (tickers.length === 0) return null;
-
-  const TickerItem = ({ item }: { item: TickerData }) => (
+// 메모이제이션된 TickerItem 컴포넌트
+const TickerItem = memo(function TickerItem({ item }: { item: TickerData }) {
+  return (
     <span className="mx-6 text-xs font-['JetBrains_Mono'] flex items-center gap-2 shrink-0">
       <span className="text-text-primary font-semibold">{item.ticker}</span>
       {item.score !== null && (
@@ -48,6 +32,25 @@ export default function TickerMarquee() {
       )}
     </span>
   );
+});
+
+export default function TickerMarquee() {
+  const [tickers, setTickers] = useState<TickerData[]>([]);
+
+  useEffect(() => {
+    async function fetchTickers() {
+      try {
+        const response = await fetch("/api/top-tickers");
+        const data = await response.json();
+        setTickers(data.tickers);
+      } catch (error) {
+        console.error("Tickers fetch error:", error);
+      }
+    }
+    fetchTickers();
+  }, []);
+
+  if (tickers.length === 0) return null;
 
   return (
     <div className="fixed top-[72px] left-0 right-0 z-[999] bg-bg-secondary border-b border-border overflow-hidden py-2 max-md:top-[60px] max-md:pt-4">

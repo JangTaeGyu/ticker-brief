@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const STORAGE_KEY = "tickerbrief_email";
 
@@ -30,6 +30,8 @@ interface UseSubscriptionFormReturn {
 
 export function useSubscriptionForm(options: UseSubscriptionFormOptions = {}): UseSubscriptionFormReturn {
   const { onSuccess } = options;
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
 
   const [email, setEmail] = useState("");
   const [hasStoredEmail, setHasStoredEmail] = useState(false);
@@ -67,13 +69,11 @@ export function useSubscriptionForm(options: UseSubscriptionFormOptions = {}): U
     return () => clearTimeout(timer);
   }, [email]);
 
-  const updateRemainingReports = (decrement: number) => {
-    if (remainingReports !== null) {
-      setRemainingReports(Math.max(0, remainingReports - decrement));
-    }
-  };
+  const updateRemainingReports = useCallback((decrement: number) => {
+    setRemainingReports((prev) => prev !== null ? Math.max(0, prev - decrement) : null);
+  }, []);
 
-  const handleSubmit = async (tickers: string[]): Promise<boolean> => {
+  const handleSubmit = useCallback(async (tickers: string[]): Promise<boolean> => {
     setSubmitStatus(null);
 
     if (!email || !email.includes("@")) {
@@ -106,9 +106,9 @@ export function useSubscriptionForm(options: UseSubscriptionFormOptions = {}): U
       setHasStoredEmail(true);
 
       setSubmitStatus({ type: "success", message: "신청이 완료되었습니다! 곧 리포트를 받아보실 수 있습니다." });
-      updateRemainingReports(tickers.length);
+      setRemainingReports((prev) => prev !== null ? Math.max(0, prev - tickers.length) : null);
 
-      onSuccess?.();
+      onSuccessRef.current?.();
       return true;
     } catch (error) {
       setSubmitStatus({
@@ -119,7 +119,7 @@ export function useSubscriptionForm(options: UseSubscriptionFormOptions = {}): U
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [email]);
 
   return {
     // State
