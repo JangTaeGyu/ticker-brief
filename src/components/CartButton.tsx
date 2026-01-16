@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useCartContext } from "@/contexts/CartContext";
 import CartPanel from "./CartPanel";
 import RemainingReports from "./RemainingReports";
@@ -18,6 +18,7 @@ export default function CartButton() {
     message: string;
   } | null>(null);
   const [remainingReports, setRemainingReports] = useState<number | null>(null);
+  const lastFetchedEmail = useRef<string>("");
 
   const { items, count, isLoaded, removeItem, clearCart } = useCartContext();
 
@@ -30,35 +31,56 @@ export default function CartButton() {
     }
   }, []);
 
-  // 패널 열릴 때 상태 초기화
+  // 패널 열릴 때 상태 초기화 및 한도 조회
   useEffect(() => {
     if (isPanelOpen) {
       setSubmitStatus(null);
-    }
-  }, [isPanelOpen]);
 
-  // 이메일이 있을 때 남은 한도 조회
+      // 패널 열릴 때만 한도 조회 (이미 조회한 이메일이면 스킵)
+      if (email && email.includes("@") && email !== lastFetchedEmail.current) {
+        const fetchLimit = async () => {
+          try {
+            const response = await fetch(`/api/check-limit?email=${encodeURIComponent(email)}`);
+            const data = await response.json();
+            setRemainingReports(data.remaining);
+            lastFetchedEmail.current = email;
+          } catch (error) {
+            console.error("Check limit error:", error);
+            setRemainingReports(null);
+          }
+        };
+        fetchLimit();
+      }
+    }
+  }, [isPanelOpen, email]);
+
+  // 이메일 변경 시 패널이 열려있을 때만 한도 조회 (디바운스)
   useEffect(() => {
-    if (!email || !email.includes("@")) {
-      setRemainingReports(null);
+    if (!isPanelOpen || !email || !email.includes("@")) {
       return;
     }
 
-    const fetchLimit = async () => {
+    // 이미 같은 이메일로 조회했으면 스킵
+    if (email === lastFetchedEmail.current) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
       try {
         const response = await fetch(`/api/check-limit?email=${encodeURIComponent(email)}`);
         const data = await response.json();
         setRemainingReports(data.remaining);
+        lastFetchedEmail.current = email;
       } catch (error) {
         console.error("Check limit error:", error);
         setRemainingReports(null);
       }
-    };
+    }, 500);
 
-    fetchLimit();
+    return () => clearTimeout(timer);
   }, [email, isPanelOpen]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setSubmitStatus(null);
 
     if (!email || !email.includes("@")) {
@@ -98,10 +120,8 @@ export default function CartButton() {
         message: `${items.length}개 티커 신청이 완료되었습니다!`,
       });
 
-      // 남은 한도 업데이트
-      if (remainingReports !== null) {
-        setRemainingReports(Math.max(0, remainingReports - items.length));
-      }
+      // 남은 한도 업데이트 (API 재호출 없이 로컬에서 계산)
+      setRemainingReports((prev) => prev !== null ? Math.max(0, prev - items.length) : null);
 
       // 2초 후 장바구니 비우고 패널 닫기
       setTimeout(() => {
@@ -116,7 +136,18 @@ export default function CartButton() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [email, items, clearCart]);
+
+  const handleRemoveItem = useCallback((ticker: string) => {
+    removeItem(ticker);
+  }, [removeItem]);
+
+  const handleClearCart = useCallback(() => {
+    clearCart();
+  }, [clearCart]);
+
+  const openPanel = useCallback(() => setIsPanelOpen(true), []);
+  const closePanel = useCallback(() => setIsPanelOpen(false), []);
 
   // 로딩 전이거나 장바구니가 비어있으면 렌더링하지 않음
   if (!isLoaded || count === 0) {
@@ -127,7 +158,7 @@ export default function CartButton() {
     <>
       {/* 플로팅 버튼 */}
       <button
-        onClick={() => setIsPanelOpen(true)}
+        onClick={openPanel}
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-accent-green text-black rounded-full shadow-lg hover:bg-emerald-600 transition-all hover:scale-105"
       >
         <svg
@@ -147,7 +178,7 @@ export default function CartButton() {
       {/* 장바구니 패널 */}
       <CartPanel
         isOpen={isPanelOpen}
-        onClose={() => setIsPanelOpen(false)}
+        onClose={closePanel}
         title={<>장바구니 <small className="text-text-muted font-normal">{count}</small></>}
       >
         {/* 장바구니 목록 */}
@@ -170,7 +201,7 @@ export default function CartButton() {
                 </div>
               </div>
               <button
-                onClick={() => removeItem(item.ticker)}
+                onClick={() => handleRemoveItem(item.ticker)}
                 className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
               >
                 <svg
@@ -240,7 +271,7 @@ export default function CartButton() {
               {isSubmitting ? "신청 중..." : "리포트 신청하기"}
             </button>
             <button
-              onClick={clearCart}
+              onClick={handleClearCart}
               disabled={isSubmitting}
               className="w-full py-2.5 text-sm text-text-muted hover:text-red-400 transition-colors disabled:opacity-50"
             >
