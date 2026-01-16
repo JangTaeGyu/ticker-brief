@@ -153,36 +153,32 @@ export async function POST(request: Request) {
       requestUserId = newUser.id;
     }
 
-    // 2. Insert reports for each ticker
+    // 2. Insert reports and request log in parallel
     const reportsToInsert = tickers.map((ticker: string) => ({
       request_user_id: requestUserId,
       ticker,
     }));
 
-    const { error: reportsError } = await supabase
-      .from("reports")
-      .insert(reportsToInsert);
+    const [reportsResult, logResult] = await Promise.all([
+      supabase.from("reports").insert(reportsToInsert),
+      supabase.from("request_logs").insert({
+        request_user_id: requestUserId,
+        ticker_count: tickers.length,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+      }),
+    ]);
 
-    if (reportsError) {
-      console.error("Reports insert error:", reportsError);
+    if (reportsResult.error) {
+      console.error("Reports insert error:", reportsResult.error);
       return NextResponse.json(
         { error: "리포트 신청 중 오류가 발생했습니다." },
         { status: 500 }
       );
     }
 
-    // 3. Insert request log
-    const { error: logError } = await supabase
-      .from("request_logs")
-      .insert({
-        request_user_id: requestUserId,
-        ticker_count: tickers.length,
-        ip_address: ipAddress,
-        user_agent: userAgent,
-      });
-
-    if (logError) {
-      console.error("Log insert error:", logError);
+    if (logResult.error) {
+      console.error("Log insert error:", logResult.error);
       // Don't fail the request if logging fails
     }
 
