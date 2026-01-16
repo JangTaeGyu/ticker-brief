@@ -1,7 +1,3 @@
-"use client";
-
-import { useState } from "react";
-
 const faqData = [
   {
     question: "정말 무료인가요?",
@@ -31,12 +27,6 @@ const faqData = [
 ];
 
 export default function FAQ() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
-  const toggleFAQ = (index: number) => {
-    setActiveIndex(activeIndex === index ? null : index);
-  };
-
   return (
     <section
       id="faq"
@@ -53,36 +43,23 @@ export default function FAQ() {
           </h2>
         </div>
 
-        {/* FAQ Items */}
+        {/* FAQ Items - CSS-only accordion with details/summary */}
         <div className="space-y-4">
           {faqData.map((faq, index) => (
-            <div
+            <details
               key={index}
-              className="bg-bg-card border border-border rounded-xl overflow-hidden"
+              className="group bg-bg-card border border-border rounded-xl overflow-hidden"
             >
-              <button
-                onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-5 flex justify-between items-center text-left hover:bg-white/[0.02] transition-colors"
-              >
+              <summary className="w-full px-6 py-5 flex justify-between items-center text-left hover:bg-white/[0.02] transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <span className="font-semibold text-[15px]">{faq.question}</span>
-                <span
-                  className={`text-xl text-text-muted transition-transform duration-300 ${
-                    activeIndex === index ? "rotate-45" : ""
-                  }`}
-                >
+                <span className="text-xl text-text-muted transition-transform duration-300 group-open:rotate-45">
                   +
                 </span>
-              </button>
-              <div
-                className={`overflow-hidden transition-all duration-300 ${
-                  activeIndex === index ? "max-h-[200px]" : "max-h-0"
-                }`}
-              >
-                <div className="px-6 py-5 text-sm text-text-secondary leading-relaxed">
-                  {faq.answer}
-                </div>
+              </summary>
+              <div className="px-6 py-5 text-sm text-text-secondary leading-relaxed">
+                {faq.answer}
               </div>
-            </div>
+            </details>
           ))}
         </div>
       </div>
