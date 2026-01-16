@@ -26,12 +26,31 @@ const faqData = [
   },
 ];
 
+// FAQ 구조화 데이터 (Google 검색 리치 스니펫)
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqData.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+};
+
 export default function FAQ() {
   return (
     <section
       id="faq"
       className="relative z-1 bg-bg-secondary py-28 px-10 max-md:py-20 max-md:px-5"
     >
+      {/* FAQ 구조화 데이터 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <div className="max-w-200 mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">

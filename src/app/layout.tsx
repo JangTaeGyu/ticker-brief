@@ -10,6 +10,66 @@ import CartButton from "@/components/CartButton";
 
 const siteUrl = "https://ticker-brief.jubrolab.dev";
 
+// JSON-LD 구조화 데이터
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "TickerBrief",
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/favicon-512.png`,
+        width: 512,
+        height: 512,
+      },
+      description: "AI 기반 미국 주식 분석 리포트 서비스",
+      contactPoint: {
+        "@type": "ContactPoint",
+        email: "ttggbbgg2@gmail.com",
+        contactType: "customer service",
+        availableLanguage: "Korean",
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
+      name: "TickerBrief",
+      description: "AI가 분석하는 프리미엄 미국 주식 리포트",
+      publisher: {
+        "@id": `${siteUrl}/#organization`,
+      },
+      inLanguage: "ko-KR",
+    },
+    {
+      "@type": "WebApplication",
+      "@id": `${siteUrl}/#webapp`,
+      name: "TickerBrief",
+      url: siteUrl,
+      applicationCategory: "FinanceApplication",
+      operatingSystem: "Web",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "KRW",
+        description: "무료 베타 서비스",
+      },
+      featureList: [
+        "AI 주식 분석",
+        "DCF 적정가 분석",
+        "SWOT 분석",
+        "Bull/Base/Bear 시나리오",
+        "백테스트",
+        "ESG 분석",
+        "피어 비교",
+      ],
+    },
+  ],
+};
+
 export const metadata: Metadata = {
   title: "TickerBrief - AI 주식 분석 리포트 | 무료 미국 주식 분석",
   description:
@@ -114,6 +174,10 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Playfair+Display:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className="overflow-x-hidden leading-relaxed">
