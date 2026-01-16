@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 const WEEKLY_LIMIT = 10;
-const UNLIMITED_EMAILS = ["zelo82@naver.com", "ttggbbgg2@gmail.com"];
+
+// 환경 변수에서 무제한 이메일 목록 로드 (쉼표로 구분)
+function getUnlimitedEmails(): string[] {
+  const emails = process.env.UNLIMITED_EMAILS || "";
+  return emails.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,7 +18,8 @@ export async function GET(request: Request) {
   }
 
   // 무제한 이메일 체크
-  if (UNLIMITED_EMAILS.includes(email.toLowerCase())) {
+  const unlimitedEmails = getUnlimitedEmails();
+  if (unlimitedEmails.includes(email.toLowerCase())) {
     return NextResponse.json({ remaining: 999, limit: 999, unlimited: true });
   }
 

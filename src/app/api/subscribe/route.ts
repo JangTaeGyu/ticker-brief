@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { headers } from "next/headers";
 
-const UNLIMITED_EMAILS = ["zelo82@naver.com", "ttggbbgg2@gmail.com"];
+// 환경 변수에서 무제한 이메일 목록 로드 (쉼표로 구분)
+function getUnlimitedEmails(): string[] {
+  const emails = process.env.UNLIMITED_EMAILS || "";
+  return emails.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+}
 
 async function sendSlackNotification(email: string, tickers: string[]) {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
@@ -101,7 +105,8 @@ export async function POST(request: Request) {
       requestUserId = existingUser.id;
 
       // 무제한 이메일은 한도 체크 스킵
-      const isUnlimited = UNLIMITED_EMAILS.includes(email.toLowerCase());
+      const unlimitedEmails = getUnlimitedEmails();
+      const isUnlimited = unlimitedEmails.includes(email.toLowerCase());
 
       if (!isUnlimited) {
         // Check weekly report limit (10 reports per week)
