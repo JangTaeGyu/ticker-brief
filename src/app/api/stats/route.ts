@@ -9,12 +9,33 @@ export async function GET() {
 
     if (error) {
       console.error("Stats error:", error);
-      return NextResponse.json({ count: 0 });
+      return NextResponse.json(
+        { count: 0 },
+        {
+          headers: {
+            "Cache-Control": "no-store",
+          },
+        }
+      );
     }
 
-    return NextResponse.json({ count: count || 0 });
+    return NextResponse.json(
+      { count: count || 0 },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+        },
+      }
+    );
   } catch (error) {
     console.error("Stats error:", error);
-    return NextResponse.json({ count: 0 });
+    return NextResponse.json(
+      { count: 0 },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
   }
 }

@@ -38,9 +38,23 @@ export async function GET() {
 
     const tickers = Array.from(tickerMap.values()).slice(0, 20);
 
-    return NextResponse.json({ tickers });
+    return NextResponse.json(
+      { tickers },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+        },
+      }
+    );
   } catch (error) {
     console.error("Top tickers error:", error);
-    return NextResponse.json({ tickers: [] });
+    return NextResponse.json(
+      { tickers: [] },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
   }
 }

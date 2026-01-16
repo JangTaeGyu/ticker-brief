@@ -32,9 +32,17 @@ export async function GET(request: Request) {
         name: item.description,
       }));
 
-    return NextResponse.json(usStocks);
+    return NextResponse.json(usStocks, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=300",
+      },
+    });
   } catch (error) {
     console.error("Ticker search error:", error);
-    return NextResponse.json([]);
+    return NextResponse.json([], {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
   }
 }
