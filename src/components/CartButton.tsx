@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useCartContext } from "@/contexts/CartContext";
 import CartPanel from "./CartPanel";
 import RemainingReports from "./RemainingReports";
-import { getGradeTextColor } from "@/lib/gradeColors";
+import { getGradeTextColor, getUpsideColor } from "@/lib/gradeColors";
 
 const STORAGE_KEY = "tickerbrief_email";
 
@@ -162,10 +162,7 @@ export default function CartButton() {
                 <div className={`font-semibold ${item.grade ? getGradeTextColor(item.grade) : "text-text-muted"}`}>
                   {item.grade || "-"}
                 </div>
-                <div className={`font-semibold ${
-                  item.upside == null ? "text-text-muted" :
-                  item.upside >= 0 ? "text-accent-green" : "text-red-400"
-                }`}>
+                <div className={`font-semibold ${getUpsideColor(item.upside ?? null)}`}>
                   {item.upside != null ? `${item.upside >= 0 ? "+" : ""}${item.upside.toFixed(1)}%` : "-"}
                 </div>
                 <div className="font-semibold text-text-primary">

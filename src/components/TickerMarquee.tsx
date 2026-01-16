@@ -1,23 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getGradeTextColor } from "@/lib/gradeColors";
+import { getGradeTextColor, getUpsideColor } from "@/lib/gradeColors";
 
 interface TickerData {
   ticker: string;
   score: number | null;
   grade: string | null;
   upside: number | null;
-}
-
-function getUpsideColor(upside: number | null): string {
-  if (upside === null) return "text-text-muted";
-  if (upside >= 20) return "text-[#10b981]"; // green
-  if (upside >= 10) return "text-[#34d399]"; // emerald
-  if (upside >= 0) return "text-[#06b6d4]"; // cyan
-  if (upside >= -10) return "text-[#facc15]"; // yellow
-  if (upside >= -20) return "text-[#f97316]"; // orange
-  return "text-[#ef4444]"; // red
 }
 
 export default function TickerMarquee() {

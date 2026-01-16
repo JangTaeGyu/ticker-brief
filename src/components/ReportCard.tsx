@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getGradeTextColor, getEsgColor } from "@/lib/gradeColors";
+import { getGradeTextColor, getEsgColor, getUpsideColor, getScoreColor, getStatusColor } from "@/lib/gradeColors";
 import { useCartContext } from "@/contexts/CartContext";
 import ReportDetailModal from "./ReportDetailModal";
 
@@ -20,36 +20,6 @@ interface ReportCardProps {
   isMine: boolean;
 }
 
-// 상태별 서술형 메시지
-const statusMessages: Record<string, { message: string; borderColor: string; textColor: string }> = {
-  pending: { message: "리포트 생성 대기중입니다", borderColor: "border-gray-500", textColor: "text-gray-500" },
-  processing: { message: "리포트를 생성하고 있습니다", borderColor: "border-blue-500", textColor: "text-blue-500" },
-  failed: { message: "리포트 생성에 실패했습니다", borderColor: "border-red-500", textColor: "text-red-500" },
-};
-
-// 상승여력별 색상
-function getUpsideColor(upside: number | null): string {
-  if (upside === null) return "text-text-muted";
-  if (upside >= 20) return "text-[#10b981]";
-  if (upside >= 10) return "text-[#34d399]";
-  if (upside >= 0) return "text-[#06b6d4]";
-  if (upside >= -10) return "text-[#facc15]";
-  if (upside >= -20) return "text-[#f97316]";
-  return "text-[#ef4444]";
-}
-
-// 점수별 색상
-function getScoreColor(score: number | null): string {
-  if (score === null) return "text-text-muted";
-  if (score >= 80) return "text-[#10b981]";
-  if (score >= 70) return "text-[#34d399]";
-  if (score >= 60) return "text-[#06b6d4]";
-  if (score >= 50) return "text-[#facc15]";
-  if (score >= 40) return "text-[#f97316]";
-  return "text-[#ef4444]";
-}
-
-
 export default function ReportCard({
   ticker,
   status,
@@ -67,7 +37,7 @@ export default function ReportCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isInCart, toggleItem } = useCartContext();
   const isNotCompleted = status !== "completed";
-  const statusInfo = statusMessages[status];
+  const statusInfo = getStatusColor(status);
   const esgColor = getEsgColor(esgRating ?? null);
   const inCart = isInCart(ticker);
 
@@ -82,7 +52,7 @@ export default function ReportCard({
     <>
       <div className={`relative p-6 rounded-2xl border bg-bg-card transition-all ${
         isNotCompleted
-          ? `opacity-50 ${statusInfo?.borderColor || "border-border"}`
+          ? `opacity-50 ${statusInfo.border}`
           : inCart
           ? "border-accent-green ring-1 ring-accent-green/30"
           : "border-border hover:border-accent-green/50"
@@ -264,8 +234,8 @@ export default function ReportCard({
 
         {/* 대기/처리중/실패 상태 서술형 메시지 */}
         {isNotCompleted && (
-          <div className={`pt-4 border-t text-center text-sm ${statusInfo?.borderColor || "border-border"} ${statusInfo?.textColor || "text-text-muted"}`}>
-            {statusInfo?.message || "상태를 확인할 수 없습니다"}
+          <div className={`pt-4 border-t text-center text-sm ${statusInfo.border} ${statusInfo.text}`}>
+            {statusInfo.message || "상태를 확인할 수 없습니다"}
           </div>
         )}
       </div>

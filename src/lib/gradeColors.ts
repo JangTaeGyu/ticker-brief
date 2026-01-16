@@ -44,3 +44,38 @@ export function getEsgColor(rating: string | null): { text: string; bg: string }
   }
   return { text: "text-text-muted", bg: "bg-text-muted/20" };
 }
+
+// 상승여력 색상 반환
+export function getUpsideColor(upside: number | null): string {
+  if (upside === null) return "text-text-muted";
+  if (upside >= 20) return "text-[#10b981]"; // emerald-500 (강한 상승)
+  if (upside >= 10) return "text-[#34d399]"; // emerald-400 (상승)
+  if (upside >= 0) return "text-[#06b6d4]";  // cyan-500 (약한 상승)
+  if (upside >= -10) return "text-[#facc15]"; // yellow-400 (약한 하락)
+  if (upside >= -20) return "text-[#f97316]"; // orange-500 (하락)
+  return "text-[#ef4444]"; // red-500 (강한 하락)
+}
+
+// 점수 색상 반환
+export function getScoreColor(score: number | null): string {
+  if (score === null) return "text-text-muted";
+  if (score >= 80) return "text-[#10b981]"; // emerald-500 (매우 높음)
+  if (score >= 70) return "text-[#34d399]"; // emerald-400 (높음)
+  if (score >= 60) return "text-[#06b6d4]"; // cyan-500 (중간)
+  if (score >= 50) return "text-[#facc15]"; // yellow-400 (낮음)
+  if (score >= 40) return "text-[#f97316]"; // orange-500 (매우 낮음)
+  return "text-[#ef4444]"; // red-500 (위험)
+}
+
+// 리포트 상태별 색상
+export const STATUS_COLORS: Record<string, { border: string; text: string; message: string }> = {
+  pending: { border: "border-gray-500", text: "text-gray-500", message: "리포트 생성 대기중입니다" },
+  processing: { border: "border-blue-500", text: "text-blue-500", message: "리포트를 생성하고 있습니다" },
+  failed: { border: "border-red-500", text: "text-red-500", message: "리포트 생성에 실패했습니다" },
+  completed: { border: "border-border", text: "text-text-primary", message: "" },
+};
+
+// 상태 색상 반환
+export function getStatusColor(status: string): { border: string; text: string; message: string } {
+  return STATUS_COLORS[status] || STATUS_COLORS.pending;
+}

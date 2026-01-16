@@ -1,6 +1,6 @@
 "use client";
 
-import { getGradeTextColor, getEsgColor } from "@/lib/gradeColors";
+import { getGradeTextColor, getEsgColor, getUpsideColor, getScoreColor } from "@/lib/gradeColors";
 import Modal from "./Modal";
 
 interface ReportDetailModalProps {
@@ -16,28 +16,6 @@ interface ReportDetailModalProps {
   exitStrategy?: string | null;
   esgRating?: string | null;
   esgScore?: number | null;
-}
-
-// 상승여력별 색상
-function getUpsideColor(upside: number | null): string {
-  if (upside === null) return "text-text-muted";
-  if (upside >= 20) return "text-[#10b981]";
-  if (upside >= 10) return "text-[#34d399]";
-  if (upside >= 0) return "text-[#06b6d4]";
-  if (upside >= -10) return "text-[#facc15]";
-  if (upside >= -20) return "text-[#f97316]";
-  return "text-[#ef4444]";
-}
-
-// 점수별 색상
-function getScoreColor(score: number | null): string {
-  if (score === null) return "text-text-muted";
-  if (score >= 80) return "text-[#10b981]";
-  if (score >= 70) return "text-[#34d399]";
-  if (score >= 60) return "text-[#06b6d4]";
-  if (score >= 50) return "text-[#facc15]";
-  if (score >= 40) return "text-[#f97316]";
-  return "text-[#ef4444]";
 }
 
 export default function ReportDetailModal({
