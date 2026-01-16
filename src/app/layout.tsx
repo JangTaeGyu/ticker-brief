@@ -76,8 +76,8 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "구글서치콘솔_인증코드_여기에_입력",
-    // naver: "네이버서치어드바이저_인증코드",
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    // naver: process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION || undefined,
   },
   category: "finance",
   icons: {
