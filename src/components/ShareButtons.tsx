@@ -50,12 +50,6 @@ export default function ShareButtons({ ticker, grade, upside, compact = false }:
     window.open(facebookUrl, "_blank", "width=550,height=420");
   }, [shareText, shareUrl]);
 
-  const handleKakaoShare = useCallback(() => {
-    // Kakao Link without SDK - opens KakaoTalk share page
-    const kakaoUrl = `https://story.kakao.com/share?url=${encodeURIComponent(shareUrl)}`;
-    window.open(kakaoUrl, "_blank", "width=550,height=420");
-  }, [shareUrl]);
-
   const buttonClass = compact
     ? "p-1.5 rounded-md hover:bg-white/5 transition-colors"
     : "p-2 rounded-lg bg-bg-card border border-border hover:border-accent-green/50 transition-colors";
@@ -103,17 +97,6 @@ export default function ShareButtons({ ticker, grade, upside, compact = false }:
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`${iconClass} text-text-muted`}>
           <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-        </svg>
-      </button>
-
-      {/* Kakao */}
-      <button
-        onClick={handleKakaoShare}
-        className={buttonClass}
-        title="카카오스토리에 공유"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`${iconClass} text-text-muted`}>
-          <path d="M12 3c5.799 0 10.5 3.664 10.5 8.185 0 4.52-4.701 8.184-10.5 8.184a13.5 13.5 0 01-1.727-.11l-4.408 2.883c-.501.265-.678.236-.472-.413l.892-3.678c-2.88-1.46-4.785-3.99-4.785-6.866C1.5 6.665 6.201 3 12 3zm5.907 8.06l1.47-1.424a.472.472 0 00-.656-.678l-1.928 1.866V9.282a.472.472 0 00-.944 0v2.557a.471.471 0 000 .222V13.5a.472.472 0 00.944 0v-1.363l.427-.413 1.428 2.033a.472.472 0 10.773-.543l-1.514-2.155zm-2.958 1.924h-1.46V9.297a.472.472 0 00-.943 0v4.159c0 .26.21.472.471.472h1.932a.472.472 0 100-.944zm-5.857-1.092l.696-1.707.638 1.707H9.092zm2.523.488l.002-.016a.469.469 0 00-.127-.32l-1.046-2.8a.69.69 0 00-.627-.474.696.696 0 00-.653.447l-1.661 4.075a.472.472 0 00.874.357l.33-.813h2.07l.299.8a.472.472 0 10.884-.33l-.345-.926zM5.293 13.5h1.932a.472.472 0 100-.944H5.765V9.297a.472.472 0 00-.944 0v3.731c0 .26.21.472.472.472z" />
         </svg>
       </button>
     </div>
