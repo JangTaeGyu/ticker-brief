@@ -124,4 +124,6 @@ npm run lint     # ESLint 실행
 
 ## 라이선스
 
-ISC
+이 프로젝트는 [ISC 라이선스](LICENSE)를 따릅니다.
+
+Copyright (c) 2025 TickerBrief
