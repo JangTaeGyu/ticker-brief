@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { VirtuosoGrid } from "react-virtuoso";
 import ReportCard from "@/components/ReportCard";
 import SubscribeModal from "@/components/SubscribeModal";
+import { SkeletonReportGrid } from "@/components/Skeleton";
 import { GRADE_OPTIONS } from "@/lib/gradeColors";
 
 const STORAGE_KEY = "tickerbrief_email";
@@ -224,12 +225,7 @@ export default function TodayReportsPage() {
         )}
 
         {/* 로딩 상태 */}
-        {isFetching && (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-2 border-accent-green border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-text-muted">리포트를 불러오는 중...</p>
-          </div>
-        )}
+        {isFetching && <SkeletonReportGrid count={6} />}
 
         {/* 에러 상태 */}
         {error && !isFetching && (
