@@ -4,6 +4,7 @@ import { useState, memo, useCallback } from "react";
 import { getGradeTextColor, getEsgColor, getUpsideColor, getScoreColor, getStatusColor } from "@/lib/gradeColors";
 import { useCartContext } from "@/contexts/CartContext";
 import ReportDetailModal from "./ReportDetailModal";
+import ShareButtons from "./ShareButtons";
 
 interface ReportCardProps {
   ticker: string;
@@ -232,6 +233,12 @@ const ReportCard = memo(function ReportCard({
                 </div>
               </div>
             )}
+
+            {/* 공유 버튼 */}
+            <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+              <span className="text-xs text-text-muted">공유</span>
+              <ShareButtons ticker={ticker} grade={grade} upside={upside} compact />
+            </div>
           </>
         )}
 

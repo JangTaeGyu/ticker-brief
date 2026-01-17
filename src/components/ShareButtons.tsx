@@ -6,9 +6,10 @@ interface ShareButtonsProps {
   ticker: string;
   grade?: string | null;
   upside?: number | null;
+  compact?: boolean;
 }
 
-export default function ShareButtons({ ticker, grade, upside }: ShareButtonsProps) {
+export default function ShareButtons({ ticker, grade, upside, compact = false }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
 
   const siteUrl = "https://ticker-brief.jubrolab.dev";
@@ -55,22 +56,28 @@ export default function ShareButtons({ ticker, grade, upside }: ShareButtonsProp
     window.open(kakaoUrl, "_blank", "width=550,height=420");
   }, [shareUrl]);
 
+  const buttonClass = compact
+    ? "p-1.5 rounded-md hover:bg-white/5 transition-colors"
+    : "p-2 rounded-lg bg-bg-card border border-border hover:border-accent-green/50 transition-colors";
+
+  const iconClass = compact ? "w-3.5 h-3.5" : "w-4 h-4";
+
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-text-muted mr-1">공유</span>
+    <div className={`flex items-center ${compact ? "gap-1" : "gap-2"}`}>
+      {!compact && <span className="text-xs text-text-muted mr-1">공유</span>}
 
       {/* Copy Link */}
       <button
         onClick={handleCopyLink}
-        className="p-2 rounded-lg bg-bg-card border border-border hover:border-accent-green/50 transition-colors"
+        className={buttonClass}
         title="링크 복사"
       >
         {copied ? (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-accent-green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`${iconClass} text-accent-green`}>
             <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
           </svg>
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-text-muted">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`${iconClass} text-text-muted`}>
             <path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z" />
             <path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z" />
           </svg>
@@ -80,10 +87,10 @@ export default function ShareButtons({ ticker, grade, upside }: ShareButtonsProp
       {/* Twitter/X */}
       <button
         onClick={handleTwitterShare}
-        className="p-2 rounded-lg bg-bg-card border border-border hover:border-accent-green/50 transition-colors"
+        className={buttonClass}
         title="X(트위터)에 공유"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-text-muted">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`${iconClass} text-text-muted`}>
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
         </svg>
       </button>
@@ -91,10 +98,10 @@ export default function ShareButtons({ ticker, grade, upside }: ShareButtonsProp
       {/* Facebook */}
       <button
         onClick={handleFacebookShare}
-        className="p-2 rounded-lg bg-bg-card border border-border hover:border-accent-green/50 transition-colors"
+        className={buttonClass}
         title="페이스북에 공유"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-text-muted">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`${iconClass} text-text-muted`}>
           <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
         </svg>
       </button>
@@ -102,10 +109,10 @@ export default function ShareButtons({ ticker, grade, upside }: ShareButtonsProp
       {/* Kakao */}
       <button
         onClick={handleKakaoShare}
-        className="p-2 rounded-lg bg-bg-card border border-border hover:border-accent-green/50 transition-colors"
+        className={buttonClass}
         title="카카오스토리에 공유"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-text-muted">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={`${iconClass} text-text-muted`}>
           <path d="M12 3c5.799 0 10.5 3.664 10.5 8.185 0 4.52-4.701 8.184-10.5 8.184a13.5 13.5 0 01-1.727-.11l-4.408 2.883c-.501.265-.678.236-.472-.413l.892-3.678c-2.88-1.46-4.785-3.99-4.785-6.866C1.5 6.665 6.201 3 12 3zm5.907 8.06l1.47-1.424a.472.472 0 00-.656-.678l-1.928 1.866V9.282a.472.472 0 00-.944 0v2.557a.471.471 0 000 .222V13.5a.472.472 0 00.944 0v-1.363l.427-.413 1.428 2.033a.472.472 0 10.773-.543l-1.514-2.155zm-2.958 1.924h-1.46V9.297a.472.472 0 00-.943 0v4.159c0 .26.21.472.471.472h1.932a.472.472 0 100-.944zm-5.857-1.092l.696-1.707.638 1.707H9.092zm2.523.488l.002-.016a.469.469 0 00-.127-.32l-1.046-2.8a.69.69 0 00-.627-.474.696.696 0 00-.653.447l-1.661 4.075a.472.472 0 00.874.357l.33-.813h2.07l.299.8a.472.472 0 10.884-.33l-.345-.926zM5.293 13.5h1.932a.472.472 0 100-.944H5.765V9.297a.472.472 0 00-.944 0v3.731c0 .26.21.472.472.472z" />
         </svg>
       </button>
