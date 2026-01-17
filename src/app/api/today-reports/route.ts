@@ -43,10 +43,11 @@ export async function GET(request: NextRequest) {
     // 시간 범위 계산
     const { start, end } = getTodayRange();
 
-    // 오늘의 전체 리포트 조회 (7시 ~ 다음날 7시)
+    // 오늘의 완료된 리포트 조회 (7시 ~ 다음날 7시)
     const { data: reports, error } = await supabase
       .from("reports")
       .select("id, ticker, status, score, grade, upside, summary, thesis, entry_strategy, exit_strategy, esg_rating, esg_score, created_at")
+      .eq("status", "completed")
       .gte("created_at", start)
       .lt("created_at", end)
       .order("created_at", { ascending: false });
