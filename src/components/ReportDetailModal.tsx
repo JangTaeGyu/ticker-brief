@@ -2,6 +2,7 @@
 
 import { getGradeTextColor, getEsgColor, getUpsideColor, getScoreColor } from "@/lib/gradeColors";
 import Modal from "./Modal";
+import ShareButtons from "./ShareButtons";
 
 interface ReportDetailModalProps {
   isOpen: boolean;
@@ -169,6 +170,11 @@ export default function ReportDetailModal({
             </div>
           </div>
         )}
+
+        {/* 공유 버튼 */}
+        <div className="pt-4 border-t border-border flex justify-end">
+          <ShareButtons ticker={ticker} grade={grade} upside={upside} />
+        </div>
       </div>
     </Modal>
   );
