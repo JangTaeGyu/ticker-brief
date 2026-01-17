@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { VirtuosoGrid } from "react-virtuoso";
 import ReportCard from "@/components/ReportCard";
 import SubscribeModal from "@/components/SubscribeModal";
@@ -33,36 +32,34 @@ interface Report {
 }
 
 export default function TodayReportsPage() {
-  const router = useRouter();
   const [email, setEmail] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [reports, setReports] = useState<Report[]>([]);
   const [myTickers, setMyTickers] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isFetching, setIsFetching] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("all");
   const [tickerSearch, setTickerSearch] = useState("");
   const [showMineOnly, setShowMineOnly] = useState(false);
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
 
-  // localStorage에서 이메일 확인 - 없으면 메인으로 리다이렉트
+  // localStorage에서 이메일 확인
   useEffect(() => {
     const savedEmail = localStorage.getItem(STORAGE_KEY);
     if (savedEmail) {
       setEmail(savedEmail);
-      setIsLoading(false);
-    } else {
-      router.replace("/");
     }
-  }, [router]);
+  }, []);
 
   // 리포트 목록 조회
-  const fetchReports = useCallback(async (userEmail: string) => {
+  const fetchReports = useCallback(async (userEmail?: string | null) => {
     setIsFetching(true);
     setError(null);
 
     try {
-      const res = await fetch(`/api/today-reports?email=${encodeURIComponent(userEmail)}`);
+      const url = userEmail
+        ? `/api/today-reports?email=${encodeURIComponent(userEmail)}`
+        : `/api/today-reports`;
+      const res = await fetch(url);
       const data = await res.json();
 
       if (!res.ok) {
@@ -78,11 +75,9 @@ export default function TodayReportsPage() {
     }
   }, []);
 
-  // 이메일이 설정되면 리포트 조회
+  // 페이지 로드 시 리포트 조회
   useEffect(() => {
-    if (email) {
-      fetchReports(email);
-    }
+    fetchReports(email);
   }, [email, fetchReports]);
 
   // 필터링된 리포트
@@ -121,17 +116,6 @@ export default function TodayReportsPage() {
     });
     return counts;
   }, [reports]);
-
-  // 초기 로딩 중
-  if (isLoading) {
-    return (
-      <main className="min-h-screen pt-32 pb-20 px-10 max-md:px-5">
-        <div className="max-w-[1200px] mx-auto text-center">
-          <div className="animate-pulse text-text-muted">로딩 중...</div>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen pt-32 pb-20 px-10 max-md:px-5">
@@ -252,7 +236,7 @@ export default function TodayReportsPage() {
           <div className="text-center py-12">
             <p className="text-red-400 mb-4">{error}</p>
             <button
-              onClick={() => email && fetchReports(email)}
+              onClick={() => fetchReports(email)}
               className="px-4 py-2 bg-accent-green text-black rounded-lg font-medium hover:bg-emerald-600 transition-colors"
             >
               다시 시도
@@ -261,7 +245,7 @@ export default function TodayReportsPage() {
         )}
 
         {/* 빈 목록 상태 */}
-        {!isFetching && !error && reports.length === 0 && email && (
+        {!isFetching && !error && reports.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📭</div>
             <p className="text-text-muted mb-6">오늘 생성된 리포트가 없습니다</p>

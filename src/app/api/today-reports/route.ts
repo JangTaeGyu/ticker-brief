@@ -40,35 +40,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
 
-    if (!email) {
-      return NextResponse.json(
-        { error: "이메일이 필요합니다" },
-        { status: 400 }
-      );
-    }
-
     // 시간 범위 계산
     const { start, end } = getTodayRange();
 
-    // 병렬로 쿼리 실행
-    const [userResult, reportsResult] = await Promise.all([
-      // 1. 해당 이메일의 사용자 조회
-      supabase
-        .from("request_users")
-        .select("id")
-        .eq("email", email)
-        .single(),
-      // 2. 오늘의 전체 리포트 조회 (7시 ~ 다음날 7시)
-      supabase
-        .from("reports")
-        .select("id, ticker, status, score, grade, upside, summary, thesis, entry_strategy, exit_strategy, esg_rating, esg_score, created_at")
-        .gte("created_at", start)
-        .lt("created_at", end)
-        .order("created_at", { ascending: false }),
-    ]);
-
-    const { data: user } = userResult;
-    const { data: reports, error } = reportsResult;
+    // 오늘의 전체 리포트 조회 (7시 ~ 다음날 7시)
+    const { data: reports, error } = await supabase
+      .from("reports")
+      .select("id, ticker, status, score, grade, upside, summary, thesis, entry_strategy, exit_strategy, esg_rating, esg_score, created_at")
+      .gte("created_at", start)
+      .lt("created_at", end)
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Supabase error:", error);
@@ -78,20 +59,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 3. 사용자가 신청한 티커 목록 조회
+    // 사용자가 신청한 티커 목록 조회 (이메일이 있는 경우에만)
     let myTickers: string[] = [];
-    if (user) {
-      const { data: userReports } = await supabase
-        .from("reports")
-        .select("ticker")
-        .eq("request_user_id", user.id);
+    if (email) {
+      const { data: user } = await supabase
+        .from("request_users")
+        .select("id")
+        .eq("email", email)
+        .single();
 
-      if (userReports) {
-        myTickers = [...new Set(userReports.map((r) => r.ticker))];
+      if (user) {
+        const { data: userReports } = await supabase
+          .from("reports")
+          .select("ticker")
+          .eq("request_user_id", user.id);
+
+        if (userReports) {
+          myTickers = [...new Set(userReports.map((r) => r.ticker))];
+        }
       }
     }
 
-    // 4. 중복 티커 제거 (최신 리포트만 유지)
+    // 중복 티커 제거 (최신 리포트만 유지)
     const tickerMap = new Map<string, typeof reports[0]>();
     reports?.forEach((report) => {
       if (!tickerMap.has(report.ticker)) {
